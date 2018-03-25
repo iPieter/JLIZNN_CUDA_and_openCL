@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
 
 namespace Ui {
 class MainWindow;
@@ -15,8 +16,35 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void resizeEvent(QResizeEvent* event);
+    void resize();
+
 private:
+    void createFilter(double **gKernel, int size);
+    int createFilter(int **gKernel, int size);
+
     Ui::MainWindow *ui;
+    QGraphicsScene *scene;
+    QPixmap image;
+    unsigned char *img = NULL;
+    int w, h, comp;
+
+    int r,g,b;
+
+    int kernel_size = 5;
+
+private slots:
+    void on_pushButton_pressed();
+    void on_horizontalSlider_sliderMoved(int position);
+    void on_pushButton_2_pressed();
+    void on_pushButton_3_pressed();
+    void on_horizontalSlider_valueChanged(int value);
+    void on_pushButton_4_pressed();
+    void on_horizontalSlider_4_valueChanged(int value);
+    void on_horizontalSlider_3_valueChanged(int value);
+    void on_horizontalSlider_2_valueChanged(int value);
 };
+
 
 #endif // MAINWINDOW_H
