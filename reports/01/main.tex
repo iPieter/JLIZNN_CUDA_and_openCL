@@ -10,6 +10,7 @@
 \usepackage{float}
 \usepackage{booktabs}
 \usepackage{multicol}
+\usepackage{longtable}
 \usepackage{minted}
 % If you have trouble with the mathtime package please see our technical support 
 % document at: http://www.aeaweb.org/templates/technical_support.pdf
@@ -58,7 +59,7 @@ Deze opdracht wordt ge\"implementeerd op een grafische kaart van NVIDEA, waarbij
 \section{Analyse}
 
 \subsection{GPU}
-Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps bestaan typisch uit 32 threads, waardoor de blocksize idealiter een veelvoud van 32 is.
+Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps kunnen typisch 32 threads in parallel runnen, waardoor de blocksize idealiter een veelvoud van 32 is.
 
 \subsection{CUDA}
 Om de taken van de threads effici\"ent te kunnen verdelen, biedt CUDA een \emph{grid} aan. Dit grid bestaat uit blokken, die dus uitgevoerd worden door een SM. Binnen deze blokken kunnen threads ge\"identificeerd worden door een 1D, 2D of 3D set van indices. In ieder geval, de grootte $x \cdot y \cdot z$ kan niet groter zijn dan het aantal threads op een SM.
@@ -80,10 +81,19 @@ Om de waarden te swappen, wordt gebruikt gemaakt van het \emph{XOR swapping algo
   X = X XOR Y
 \end{minted}
 
+Het resultaat zijn twee variabelen die van waarde zijn verwisseld, zonder gebruik te maken van een helper-variabele.
+
 \section{Oplossing}
-Om de GPU en CPU te kunnen vergelijken, is de code om een array te swappen twee keer ge\"implementeerd: eenmaal voor de CPU met een traditionele for-lus en eenmaal voor de GPU, waarbij met variabele blocksize $n$.
+Om de GPU en CPU te kunnen vergelijken, is de code om een array te swappen twee keer ge\"implementeerd: eenmaal voor de CPU met een traditionele for-lus en eenmaal voor de GPU, waarbij met variabele blocksize.
 
 Daarnaast is ook de lengte van de array variabel, waardoor de evaluatie over meerdere lengtes kan gebeuren. De code hiervoor is te vinden als bijlage.
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.8\textwidth]{cpu_vs_gpu.eps}
+  \caption{Eerste experiment, de vergelijking tussen CPU en GPU voor verschillende array-groottes met een blocksize $n=64$}
+  \label{fig:b4_cpu_gpu}
+\end{figure*}
 
 \subsection{Swap op de CPU}
 Voor de array om te wisselen op de CPU, itereren we tot het midden van de array, waarbij beide helften worden omgewisseld.
@@ -101,27 +111,39 @@ De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door 
 
 De benchmarks worden bij CUDA niet gemeten via de \mintinline{c}{clock()}-functie, aangezien we er niet vanuit mogen gaan dat de code op de GPU niet gesynchroniseerd hoeft te zijn. CUDA biedt echter ook een functie aan, waarmee de tijd als zwevende kommagetal kan gemeten worden. 
 
+\begin{minted}{c}
+  cudaEventRecord(swap_start);
+  cudaEventSynchronize(swap_stop);
+  cudaEventElapsedTime( &ms, 
+    swap_start, 
+    swap_stop );
+\end{minted}
  
+
+
+
+In het eerste experiment, dat te zien is op figuur~\ref{fig:b4_cpu_gpu}, is de blocksize $n$ vast gedefineerd, terwijl iteratief een range van array-groottes wordt ge\"evalueerd. 
+
 \subsection{Vergelijking}
 In figuur~\ref{blocksize} is de invloed van de grootte van de blocksize op de uitvoersnelheid weergegeven. Ter vergelijking is ook de tijd op de CPU weergegeven.
 
 \begin{figure}
 \centering
-\includegraphics[width=0.5\textwidth]{blocksize.eps}
+\includegraphics[width=0.55\textwidth]{blocksize.eps}
 \caption{Invloed van de blocksize $n$.}
 \label{blocksize}
 \end{figure}
 
-Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn van 32 een overduidelijk sneller zijn. Hoe beter de wraps benut worden---door dus veelvouden van 32 te kiezen, hoe beter de uitvoersnelheid is.
+Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn van 32 een overduidelijk sneller zijn. Hoe beter de wraps benut worden---door dus veelvouden van 32 te kiezen, hoe beter de uitvoersnelheid is. Door deze zeer ongelukkig te kiezen, zien we zelfs dat de resultaten zelfs slechter zijn 
 
 
 
 \section{Besluit}
+Zoals verwacht is de gpu sneller
 
+Block size impact
 
-\begin{figure*}
-\includegraphics[width=\textwidth]{comp_4.eps}
-\end{figure*}
+Overhead bij upload/download
 
 
 \onecolumn
@@ -133,6 +155,10 @@ Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn
   \includegraphics[width=0.4\textwidth]{flowgraph.pdf}
   \caption{Flowchart van de code om de array te swappen op de GPU.}
 \end{figure}
+
+\newpage
+
+\include{data}
 
 \newpage
 
