@@ -1,0 +1,86 @@
+% PP-Article.tex for AEA last revised 22 June 2011
+\documentclass[10pt, twocolumn, a4paper]{article}
+
+%%%%%% NOTE FROM OVERLEAF: The mathtime package is no longer publicly available nor distributed. We recommend using a different font package e.g. mathptmx if you'd like to use a Times font.
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage[dutch]{babel}
+\usepackage{subcaption}
+\usepackage[width=.8\textwidth]{caption}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{minted}
+% If you have trouble with the mathtime package please see our technical support 
+% document at: http://www.aeaweb.org/templates/technical_support.pdf
+% You may remove the mathtime package if you can't get it working but your page
+% count may be inaccurate as a result.
+% \usepackage[cmbold]{mathtime}
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+% 
+\usepackage{pdfpages}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\setlength{\marginparwidth}{2cm}
+% Note: you may use either harvard or natbib (but not both) to provide a wider
+% variety of citation commands than latex supports natively. See below.
+
+% Uncomment the next line to use the natbib package with bibtex 
+%\usepackage{natbib}
+\usepackage{titlesec}
+
+\titlespacing*\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing*\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing*\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+
+% Uncomment the next line to use the harvard package with bibtex
+%\usepackage[abbr]{harvard}
+
+% This command determines the leading (vertical space between lines) in draft mode
+% with 1.5 corresponding to "double" spacing.
+\begin{document}
+
+\title{Geavanceerde computerarchitectuur: Labo 02 \\ 
+\large{Bewerkingen op afbeeldingen}}
+\author{\textsc{Anton Danneels en Pieter Delobelle}}
+\date{}
+\maketitle
+
+\section{Inleiding}
+Het doel van dit labo is om bewerkingen op afbeeldingen uit te voeren, zowel op de CPU alsook de GPU van de computer. 
+Hierdoor moet een inzicht bekomen worden over het performantieverschil dat een GPU kan bieden ten opzichte van een CPU; en in welke situaties dit verschil naar boven komt.
+
+Deze opdracht wordt ge\"implementeerd op een grafische kaart van NVIDIA, waarbij het \emph{CUDA}-framework gebruikt dient te worden. 
+
+\section{Analyse}
+
+\subsection{GPU}
+Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps bestaan typisch uit 32 threads, waardoor de blocksize idealiter een veelvoud van 32 is.
+
+\subsection{CUDA}
+Om de taken van de threads effici\"ent te kunnen verdelen, biedt CUDA een \emph{grid} aan. Dit grid bestaat uit blokken, die dus uitgevoerd worden door een SM. Binnen deze blokken kunnen threads ge\"identificeerd worden door een 1D, 2D of 3D set van indices. In ieder geval, de grootte $x \cdot y \cdot z$ kan niet groter zijn dan het aantal threads op een SM.
+
+Om dit op te lossen, zijn blokken ook ge-indexed, waarbij een queue wordt aangelegd door de GPU. Om de algemene index te bepalen, wordt de volgende code gebruikt (voor 1 dimensie): 
+
+\begin{minted}{C}
+  int i = blockIdx.x * blockDim.x 
+		+ threadIdx.x;
+\end{minted}
+
+\section{Oplossing}
+\subsection{Grayscale}
+De eerste opgave was om een afbeelding te veranderen naar grayscale.
+
+\subsection{Vergelijking}
+\section{Besluit}
+
+\onecolumn
+
+\appendix
+\inputminted[tabsize=4,obeytabs]{c}{labo2.c}
+
+% The appendix command is issued once, prior to all appendices, if any.
+%\appendix
+\end{document}
+
