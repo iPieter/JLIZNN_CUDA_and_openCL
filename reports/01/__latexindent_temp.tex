@@ -65,19 +65,18 @@ Om de taken van de threads effici\"ent te kunnen verdelen, biedt CUDA een \emph{
 
 Om dit op te lossen, zijn blokken ook ge-indexed, waarbij een queue wordt aangelegd door de GPU. Om de algemene index te bepalen, wordt de volgende code gebruikt (voor 1 dimensie): 
 
-\begin{minted}{c}
+\begin{minted}{C}
   int i = blockIdx.x * blockDim.x 
-    + threadIdx.x;
+		+ threadIdx.x;
 \end{minted}
-\label{c:index}
 
 \subsection{XOR-verwisseling}
 Om de waarden te swappen, wordt gebruikt gemaakt van het \emph{XOR swapping algoritme}. Dit werkt als volgt:
 
-\begin{minted}{c}
-  X = X XOR Y
-  Y = Y XOR X
-  X = X XOR Y
+\begin{minted}{C}
+X = X XOR Y
+Y = Y XOR X
+X = X XOR Y
 \end{minted}
 
 \section{Oplossing}
@@ -94,14 +93,11 @@ Voor de array om te wisselen op de CPU, itereren we tot het midden van de array,
   Operation in 0 ms
 \end{minted}
 
-Om de performantie te vergelijken, benchmarken we deze operatie ook. Dit doen we voor de CPU door \mintinline{c}{clock()} twee maal op te roepen. Deze klok heeft technisch gezien een precisie van 1 ns, dus de variabele \mintinline{c}{CLOCKS_PER_SEC} = 1 000 000. Door een geheelgetallige afronding is de precisie van onze meting afgekapt op 1 ms. Voor kleine arrays is dit niet ideaal.
+Om de performantie te vergelijken, benchmarken we deze operatie ook. Dit doen we door 
 
 \subsection{Swap op de GPU}
-De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door functie in sectie~\ref{c:index} om de index te bepalen. 
+De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door bovenstaande functie om de indices te bepalen. 
 
-De benchmarks worden bij CUDA niet gemeten via de \mintinline{c}{clock()}-functie, aangezien we er niet vanuit mogen gaan dat de code op de GPU niet gesynchroniseerd hoeft te zijn. CUDA biedt echter ook een functie aan, waarmee de tijd als zwevende kommagetal kan gemeten worden. 
-
- 
 \subsection{Vergelijking}
 In figuur~\ref{blocksize} is de invloed van de grootte van de blocksize op de uitvoersnelheid weergegeven. Ter vergelijking is ook de tijd op de CPU weergegeven.
 
@@ -128,15 +124,13 @@ Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn
 
 \appendix
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.4\textwidth]{flowgraph.pdf}
   \caption{Flowchart van de code om de array te swappen op de GPU.}
-\end{figure}
+  \end{figure}
 
-\newpage
-
-\inputminted[tabsize=4,obeytabs, ]{c}{main.c}
+\inputminted[tabsize=4,obeytabs]{c}{main.c}
 
 % The appendix command is issued once, prior to all appendices, if any.
 %\appendix
