@@ -190,7 +190,28 @@ Deze 2 filters leveren 2 waarden op, $G_x$ en $G_y$. We combineren deze om de ui
 
 We hebben 3 soorten filters getest: de grayscale filter(2 afbeeldingen), de 2D Sobel filter(4 afbeeldingen) en tot slot een 5x5 gaussian blur filter(4 afbeeldingen). 
 
+We testen op de volgende afbeeldingen:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Naam} & \textbf{Breedte} & \textbf{Hoogte} \\ \hline
+    Zebra.jpeg    & 1200             & 798             \\ \hline
+    wikipedia.png & 640              & 480             \\ \hline
+    groot.jpg     & 10240            & 6400            \\ \hline
+    mountain.jpeg & 18300            & 6875            \\ \hline
+    \end{tabular}
+    \caption{De gebruikte afbeeldingen}
+\end{table}
 
+Op de grafieken is te zien hoe de operaties op de GPU altijd sneller zijn, behalve bij de afbeelding van de zebra. Dit is te verklaren door de grayscale operatie zelf. We zitten immers de waarden van de groene en blauwe component gelijk aan de rode component zonder berekeningen. Er is dus veel extra overhead bij het uploaden en downloaden van de data en deze tijd wordt niet goedgemaakt door de snelheid van de GPU. Bij het toepassen van de kernels zijn er wel heel wat meer berekeningen waardoor er een flinke snelheidstoename is.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{grayscaling.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor grayscaling}
+    \label{blocksize}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -211,6 +232,47 @@ We hebben 3 soorten filters getest: de grayscale filter(2 afbeeldingen), de 2D S
 \onecolumn
 
 \appendix
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{test.jpg}
+    \caption{Zebra.jpg}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{output_zebra.png}
+    \caption{Het resultaat van zebra.jpg na de Sobel filter}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{wikipedia.PNG}
+    \caption{Wikipedia.png}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{wikipedia_output.png}
+    \caption{Het resultaat van Wikipedia.png na de Sobel filter}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{groot.jpg}
+    \caption{groot.jpg}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{mountain.jpeg}
+    \caption{mountain.joeg}
+    \label{blocksize}
+\end{figure}
+
+\newpage
+
 \inputminted[tabsize=4,obeytabs]{c}{labo2.c}
 \newpage
 \inputminted[tabsize=4,obeytabs]{c}{labo2_gray.c}
