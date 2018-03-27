@@ -85,8 +85,10 @@ Om de GPU en CPU te kunnen vergelijken, is de code om een array te swappen twee 
 Daarnaast is ook de lengte van de array variabel, waardoor de evaluatie over meerdere lengtes kan gebeuren. De code hiervoor is te vinden als bijlage.
 
 \subsection{Swap op de CPU}
-Voor de array om te wisselen op de CPU, itereren we tot het midden van de array, waarbij beide helften worden omgewiss
+Voor de array om te wisselen op de CPU, itereren we tot het midden van de array, waarbij beide helften worden omgewisseld.
+
 \subsection{Swap op de GPU}
+De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door bovenstaande functie om de indices te bepalen. 
 
 \subsection{Vergelijking}
 In figuur~\ref{blocksize} is de invloed van de grootte van de blocksize op de uitvoersnelheid weergegeven. Ter vergelijking is ook de tijd op de CPU weergegeven.
