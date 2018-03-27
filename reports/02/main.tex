@@ -129,9 +129,8 @@ Hierbij moeten we het resultaat van deze kernel echter wel nog vermenigvuldigen 
 In code ziet de toepassing van een kernel er zo uit:
 
 \begin{minted}{C}
-const int KERNEL_SIZE = 3;
-const int kernel[KERNEL_SIZE][KERNEL_SIZE] = 
-{
+const int SIZE = 3;
+const int kernel[SIZE][SIZE] = {
     { 1, 1, 1},
     { 1, 1, 1},
     { 1, 1, 1}
@@ -139,21 +138,21 @@ const int kernel[KERNEL_SIZE][KERNEL_SIZE] =
 
 unsigned int sum_r, sum_g, sum_b;
 
-for( int i = 0; i < KERNEL_SIZE; i++ )
+for( int i = 0; i < SIZE; i++ )
 {
-    for( int j = 0; j < KERNEL_SIZE; j++ )
+    for( int j = 0; j < SIZE; j++ )
     {
-        int index = (x + i - KERNEL_SIZE / 2 + 
-            (y + j - KERNEL_SIZE /2) * w) * 3;
+        int idx = (x + i - SIZE / 2 + 
+            (y + j - SIZE /2) * w) * 3;
         
         if( TEST_INDEX(index, w*h * 3))
         {
             sum_r += kernel[i][j] * 
-                     img_original[index];
+                     img_original[idx];
             sum_g += kernel[i][j] *
-                     img_original[index + 1];
+                     img_original[idx+1];
             sum_b += kernel[i][j] *
-                     img_original[index + 2];
+                     img_original[idx+2];
         }
     }
 }
@@ -164,9 +163,49 @@ sum_g /= 9; sum_b /= 9; sum_r /= 9;
 
 Bij deze code is \mintinline{C}{TEST_INDEX} een macro die voorkomt dat we waardes opvragen buiten het array. Dit is nodig omdat pixels aan de randen geen buren hebben. Er zijn meerdere oplossingen hiervoor, een eerste is dus om deze waarden gewoon te negeren. Hierdoor lopen we wel het risico om zwarte randen rond de afbeelding te verkrijgen. Een andere oplossing is om pixelwaarden van de andere kant van de afbeelding te gebruiken of door de pixels aan de rand opnieuw te kopieren. 
 
+De edge detection filter die we uiteindelijk toegepast hebben is een combinatie van 2 andere filters:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        1 & 2 & 1 \\ \hline
+        0 & 0 & 0 \\ \hline
+        -1 & -2 & -1 \\
+        \hline
+    \end{tabular}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        1 & 0 & -1 \\ \hline
+        2 & 0 & -2 \\ \hline
+        1 & 0 & -1 \\
+        \hline
+    \end{tabular}
+    \caption{Horizontale en verticale edge detection kernels}
+\end{table}
+
+Deze 2 filters leveren 2 waarden op, $G_x$ en $G_y$. We combineren deze om de uiteindelijke pixelwaarde te bekomen: $G = \sqrt{G_x^2 + G_y^2 }$. 
+
+\section{Vergelijking}
+
+We hebben 3 soorten filters getest: de grayscale filter(2 afbeeldingen), de 2D Sobel filter(4 afbeeldingen) en tot slot een 5x5 gaussian blur filter(4 afbeeldingen). 
 
 
-\subsection{Vergelijking}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{gaussian_blur.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor gaussian blur (5x5)}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{edge_detection.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor edge detection (2D Sobel)}
+    \label{blocksize}
+\end{figure}
+
 \section{Besluit}
 
 \onecolumn
