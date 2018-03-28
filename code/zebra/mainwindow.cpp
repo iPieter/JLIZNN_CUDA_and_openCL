@@ -1,3 +1,10 @@
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
+#include <CL/cl.h>
+#endif
+
 #include <QGraphicsScene>
 #include <QTextStream>
 #include <QTimer>
@@ -30,6 +37,9 @@ void MainWindow::on_pushButton_pressed()
     //ui->setupUi(this);
 
     img = stbi_load( "/Users/Pieter/zebra_2.jpg", &w, &h, &comp, STBI_rgb );
+
+    cl_uint platform_id_count = 0;
+    clGetPlatformIDs( 0, nullptr, &platform_id_count );
 
     if(img == NULL)
     {

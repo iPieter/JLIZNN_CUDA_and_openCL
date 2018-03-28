@@ -63,7 +63,7 @@ Om de taken van de threads effici\"ent te kunnen verdelen, biedt CUDA een \emph{
 
 Om dit op te lossen, zijn blokken ook ge-indexed, waarbij een queue wordt aangelegd door de GPU. Om de algemene index te bepalen, wordt de volgende code gebruikt (voor 1 dimensie): 
 
-\begin{minted}{C}
+\begin{minted}{c}
   int i = blockIdx.x * blockDim.x 
 		+ threadIdx.x;
 \end{minted}
@@ -74,18 +74,18 @@ Voor het inlezen van de afbeeldingen hebben we gebruik gemaakt van de \mintinlin
 
 Het inlezen van afbeeldingen werkt als volgt:
 
-\begin{minted}{C}
+\begin{minted}{c}
 int w, h, comp;
 unsigned char* image = stbi_load( "wikipedia.PNG", 
                         &w, &h, &comp, STBI_rgb );
 \end{minted}
 
-In dit formaat verkrijgen we de 3 componenten van een pixel zich in als \mintinline{C}{unsigned char} datatype(0-255).
+In dit formaat verkrijgen we de 3 componenten van een pixel zich in als \mintinline{c}{unsigned char} datatype(0-255).
 
 \subsection{Grayscale}
 De eerste opgave was om een afbeelding te veranderen naar grayscale. Er zijn hiervoor meerdere oplossingen. Een eerste oplossing is om de rgb componenten aan elkaar gelijk te stellen. We passen dus een rood, groen en blauwfilter toe. Conceptueel ziet dit er voor een roodfilter als volgt uit:
 
-\begin{minted}{C}
+\begin{minted}{c}
 for( i = 0; i < w * h * comp; i += 3)
 {
     image[i + 1] = image[i];
@@ -128,7 +128,7 @@ Hierbij moeten we het resultaat van deze kernel echter wel nog vermenigvuldigen 
 
 In code ziet de toepassing van een kernel er zo uit:
 
-\begin{minted}{C}
+\begin{minted}{c}
 const int SIZE = 3;
 const int kernel[SIZE][SIZE] = {
     { 1, 1, 1},
@@ -161,7 +161,7 @@ sum_g /= 9; sum_b /= 9; sum_r /= 9;
 
 \end{minted}
 
-Bij deze code is \mintinline{C}{TEST_INDEX} een macro die voorkomt dat we waardes opvragen buiten het array. Dit is nodig omdat pixels aan de randen geen buren hebben. Er zijn meerdere oplossingen hiervoor, een eerste is dus om deze waarden gewoon te negeren. Hierdoor lopen we wel het risico om zwarte randen rond de afbeelding te verkrijgen. Een andere oplossing is om pixelwaarden van de andere kant van de afbeelding te gebruiken of door de pixels aan de rand opnieuw te kopieren. 
+Bij deze code is \mintinline{c}{TEST_INDEX} een macro die voorkomt dat we waardes opvragen buiten het array. Dit is nodig omdat pixels aan de randen geen buren hebben. Er zijn meerdere oplossingen hiervoor, een eerste is dus om deze waarden gewoon te negeren. Hierdoor lopen we wel het risico om zwarte randen rond de afbeelding te verkrijgen. Een andere oplossing is om pixelwaarden van de andere kant van de afbeelding te gebruiken of door de pixels aan de rand opnieuw te kopieren. 
 
 De edge detection filter die we uiteindelijk toegepast hebben is een combinatie van 2 andere filters:
 
@@ -206,28 +206,34 @@ We testen op de volgende afbeeldingen:
 
 Op de grafieken is te zien hoe de operaties op de GPU altijd sneller zijn, behalve bij de afbeelding van de zebra. Dit is te verklaren door de grayscale operatie zelf. We zitten immers de waarden van de groene en blauwe component gelijk aan de rode component zonder berekeningen. Er is dus veel extra overhead bij het uploaden en downloaden van de data en deze tijd wordt niet goedgemaakt door de snelheid van de GPU. Bij het toepassen van de kernels zijn er wel heel wat meer berekeningen waardoor er een flinke snelheidstoename is.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{grayscaling.eps}
+    \includegraphics[width=0.43\textwidth]{grayscaling.eps}
     \caption{Executietijd $\frac{gpu}{cpu}$ \% voor grayscaling}
     \label{blocksize}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{gaussian_blur.eps}
+    \includegraphics[width=0.43\textwidth]{gaussian_blur.eps}
     \caption{Executietijd $\frac{gpu}{cpu}$ \% voor gaussian blur (5x5)}
     \label{blocksize}
 \end{figure}
 
+\section{Besluit}
+Het gebruik van de GPU voor bewerkingen op afbeeldingen biedt meestal een snelheidwinst van 40\% tot 250\%. Zeker voor grote afbeeldingen zien we de grootste winst. Bij kleine afbeeldingen daarintegen, wordt een deel van deze winst door overhead tenietgedaan.
+
+Daarnaast hebben we ook kennis gemaakt met enkele elementaire afbeeldingtransformaties, zoals gaussiaans vervagen en randdetectie, beiden op basis van kernels. Deze tranformaties zijn eenvoudig parallel te implementeren op een GPU, waarbij we bovenstaande performantie-verbeteringen hebben waargenomen.
+
+Bij het gebruik van deze kernels, hebben we ook moeten nadenken over hoe omgegaan wordt met de randen, bij een naieve implementatie zouden er namelijk zwarte randen rond de afbeelding ontstaan.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{edge_detection.eps}
+    \includegraphics[width=0.43\textwidth]{edge_detection.eps}
     \caption{Executietijd $\frac{gpu}{cpu}$ \% voor edge detection (2D Sobel)}
     \label{blocksize}
 \end{figure}
 
-\section{Besluit}
 
 \onecolumn
 
@@ -260,13 +266,13 @@ Op de grafieken is te zien hoe de operaties op de GPU altijd sneller zijn, behal
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{groot.jpg}
+    \includegraphics[width=0.75\textwidth]{groot.png}
     \caption{groot.jpg}
     \label{blocksize}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{mountain.jpeg}
+    \includegraphics[width=0.75\textwidth]{mountain.png}
     \caption{mountain.joeg}
     \label{blocksize}
 \end{figure}
