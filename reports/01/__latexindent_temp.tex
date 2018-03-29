@@ -50,14 +50,6 @@
 \date{}
 \maketitle
 
-
-\begin{figure*}[h]
-  \centering
-  \includegraphics[width=0.72\textwidth]{cpu_vs_gpu.eps}
-  \caption{Eerste experiment, de vergelijking tussen CPU en GPU voor verschillende array-groottes met een blocksize $n=64$}
-  \label{fig:b4_cpu_gpu}
-\end{figure*}
-
 \section{Inleiding}
 Het doel van dit labo is om een array om te draaien, zowel op de CPU alsook de GPU van de computer. 
 Hierdoor moet een inzicht bekomen worden over het performantieverschil dat een GPU kan bieden ten opzichte van een CPU; en in welke situaties dit verschil naar boven komt.
@@ -96,23 +88,15 @@ Om de GPU en CPU te kunnen vergelijken, is de code om een array te swappen twee 
 
 Daarnaast is ook de lengte van de array variabel, waardoor de evaluatie over meerdere lengtes kan gebeuren. De code hiervoor is te vinden als bijlage.
 
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.8\textwidth]{cpu_vs_gpu.eps}
+  \caption{Eerste experiment, de vergelijking tussen CPU en GPU voor verschillende array-groottes met een blocksize $n=64$}
+  \label{fig:b4_cpu_gpu}
+\end{figure*}
 
 \subsection{Swap op de CPU}
 Voor de array om te wisselen op de CPU, itereren we tot het midden van de array, waarbij beide helften worden omgewisseld.
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.65\textwidth]{blocksize.eps}
-  \caption{Invloed van de blocksize op de uitvoersnelheid.}
-  \label{blocksize}
-\end{figure*}
-  
-\begin{figure*}
-    \centering
-    \includegraphics[width=1.03\textwidth]{overhead.eps}
-    \caption{Overhead van het kopieren en initialiseren van de data naar de GPU ten opzichte van de daadwerkelijke operatie uitvoeren op de GPU.}
-    \label{fig:overhead}
-\end{figure*}
 
 \begin{minted}{console}
   0000,0001,0002,0003,0004,0005
@@ -125,7 +109,7 @@ Om de performantie te vergelijken, benchmarken we deze operatie ook. Dit doen we
 Deze timing is onderverdeeld in de tijd nodig om de array te initialiseren en de daadwerkelijke tijd nodig om de wisseling uit te voeren.
 
 \subsection{Swap op de GPU}
-De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door functie in sectie~\ref{c:index} om de index te bepalen. Deze code is in een kernel beschreven, zoals te zien is in de broncode in bijlage.
+De swap-operatie op de GPU is inhoudelijk gelijk, maar de lus is vervangen door functie in sectie~\ref{c:index} om de index te bepalen. Deze c
 
 De benchmarks worden bij CUDA niet gemeten via de \mintinline{c}{clock()}-functie, aangezien we er niet vanuit mogen gaan dat de code op de GPU niet gesynchroniseerd hoeft te zijn. CUDA biedt echter ook een functie aan, waarmee de tijd als zwevende kommagetal kan gemeten worden. 
 
@@ -141,30 +125,37 @@ Zoals bij de CPU, vergelijken we zowel de daadwerkelijke operatie alsook de tijd
 
 In het eerste experiment, dat te zien is op figuur~\ref{fig:b4_cpu_gpu}, is de blocksize $n$ vast gedefineerd, terwijl iteratief een range van array-groottes wordt ge\"evalueerd. De resultaten hiervan---en ook de tweede test--- zijn ook te vinden in de bijlagen.
 
-Een tweede experiment richt specifiek op de blocksize, waarvan de resultaten in figuur~\ref{blocksize} zijn weergegevene en ter vergelijking ook de CPU-tijd. 
+Een tweede experiment richt specifiek op de blocksize, waarvan de resultaten in figuur~\ref{blocksize} zijn weergegeven. Ter vergelijking is ook de CPU-tijd gevisualiseerd. 
 
 \subsection{Vergelijking}
 De resultaten van het eerste experiment in figuur ~\ref{fig:b4_cpu_gpu} vergelijken de swap- en totale tijden tussen de CPU en GPU. Hierbij is de CPU als baseline (100 \%) genomen.
 
 Uit de data valt duidelijk op te maken dat de GPU sneller is voor
 
-\paragraph{blocksize}
-
 In figuur~\ref{blocksize} is de invloed van de grootte van de blocksize op de uitvoersnelheid weergegeven. Ter vergelijking is ook de tijd op de CPU weergegeven.
 
-Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn van 32 een overduidelijk sneller zijn. Hoe beter de wraps benut worden---door dus veelvouden van 32 te kiezen, hoe beter de uitvoersnelheid is. Door deze zeer ongelukkig te kiezen, zien we zelfs dat de resultaten zelfs slechter zijn dan een uitvoering op de CPU. 
+\begin{figure}
+\centering
+\includegraphics[width=0.55\textwidth]{blocksize.eps}
+\caption{Invloed van de blocksize op de uitvoersnelheid.}
+\label{blocksize}
+\end{figure}
 
+Uit de grafiek is duidelijk op te maken dat blocksizes $n$ die een veelvoud zijn van 32 een overduidelijk sneller zijn. Hoe beter de wraps benut worden---door dus veelvouden van 32 te kiezen, hoe beter de uitvoersnelheid is. Door deze zeer ongelukkig te kiezen, zien we zelfs dat de resultaten zelfs slechter zijn 
 
-
-\paragraph{Overhead}
-Een derde conclusie die uit de data getrokken kan worden, is te zien in figuur~\ref{fig:overhead}. Hierop is de \emph{overhead} gevisualiseerd. Concreet betekend dit hoeveel tijd gespendeerd wordt aan het kopieren van de array naar de GPU en terug ten opzichte van de tijd die nodig is om de operatie zelf uit te voeren. Het spreekt voor zich dat een lagere---relatieve maar uiteraard ook absolute---overhead positief is. 
-
-Bij kleine taken is goed te zien dat de overhead zeer groot is, tot meer dan 1000\%. Dit kan beschouwd worden als een penalty voor kleine datasets. Hiervoor kan het interessanter zijn om de CPU te gebruiken, of indien de toepassing het toelaat een pipeline op te zetten waardoor deze overhead niet bij iedere operatie nodig is. 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.55\textwidth]{blocksize.eps}
+  \caption{Invloed van de blocksize op de uitvoersnelheid.}
+  \label{blocksize}
+  \end{figure}
 
 \section{Besluit}
-Bij grote datasets is de GPU zoals verwacht sneller. De performantie is echter afhankelijk van een aantal factoren. Ten eerste moet de blocksize als veelvoud van 32 gekozen worden, om de wraps optimaal te benutten. Door dit niet te doen wordt de GPU onderbenut.
+Zoals verwacht is de gpu sneller
 
-Een tweede factor is de grootte van de data waarop operaties moeten uitgevoerd worden. Kleine datasets hebben een grotere overhead met het overbrengen van deze data, waarvoor de CPU mogelijks alsnog een betere keuze is.
+Block size impact
+
+Overhead bij upload/download
 
 
 \onecolumn

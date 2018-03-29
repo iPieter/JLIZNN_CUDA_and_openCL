@@ -63,22 +63,225 @@ Om de taken van de threads effici\"ent te kunnen verdelen, biedt CUDA een \emph{
 
 Om dit op te lossen, zijn blokken ook ge-indexed, waarbij een queue wordt aangelegd door de GPU. Om de algemene index te bepalen, wordt de volgende code gebruikt (voor 1 dimensie): 
 
-\begin{minted}{C}
+\begin{minted}{c}
   int i = blockIdx.x * blockDim.x 
 		+ threadIdx.x;
 \end{minted}
 
 \section{Oplossing}
-\subsection{Grayscale}
-De eerste opgave was om een afbeelding te veranderen naar grayscale.
+\subsection{Afbeeldingen}
+Voor het inlezen van de afbeeldingen hebben we gebruik gemaakt van de \mintinline{console}{std_image.h} header only bibliotheek van Sean Barret. Voor het wegschrijven van de afbeeldingen nadat ze bewerkt zijn, maken we gebruik van \mintinline{console}{std_image_write.h} bibliotheek van dezelfde auteur.
 
-\subsection{Vergelijking}
+Het inlezen van afbeeldingen werkt als volgt:
+
+\begin{minted}{c}
+int w, h, comp;
+unsigned char* image = stbi_load( "wikipedia.PNG", 
+                        &w, &h, &comp, STBI_rgb );
+\end{minted}
+
+In dit formaat verkrijgen we de 3 componenten van een pixel zich in als \mintinline{c}{unsigned char} datatype(0-255).
+
+\subsection{Grayscale}
+De eerste opgave was om een afbeelding te veranderen naar grayscale. Er zijn hiervoor meerdere oplossingen. Een eerste oplossing is om de rgb componenten aan elkaar gelijk te stellen. We passen dus een rood, groen en blauwfilter toe. Conceptueel ziet dit er voor een roodfilter als volgt uit:
+
+\begin{minted}{c}
+for( i = 0; i < w * h * comp; i += 3)
+{
+    image[i + 1] = image[i];
+    image[i + 2] = image[i];
+}
+\end{minted}
+
+\subsection{Filters}
+Een volgende opgave was om een edge detection filter toe te passen op de afbeelding. Hiervoor kozen we ervoor om een willekeurige filter te kunnen toepassen op de afbeelding. Een filter, ook wel kernel genoemd, werkt als volgt.
+
+We definieren een array waarin we beschrijven hoe de omliggende pixels gebruikt moeten worden. Een zeer eenvoudig voorbeeld van een filter is de volgende:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        0 & 0 & 0 \\ \hline
+        0 & 1 & 0 \\ \hline
+        0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+    \caption{Een identiteitskernel}
+\end{table}
+
+Hierbij maken we dus geen gebruik van omliggende pixels, maar mappen we een pixel terug naar zichzelf. Een iets interessantere filter is de volgende:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        1 & 1 & 1 \\ \hline
+        1 & 1 & 1 \\ \hline
+        1 & 1 & 1 \\
+        \hline
+    \end{tabular}
+    \caption{Een box blur kernel}
+\end{table}
+
+Hierbij moeten we het resultaat van deze kernel echter wel nog vermenigvuldigen met $\frac{1}{9}$ om te voorkomen dat de waarde van een component te groot wordt.
+
+In code ziet de toepassing van een kernel er zo uit:
+
+\begin{minted}{c}
+const int SIZE = 3;
+const int kernel[SIZE][SIZE] = {
+    { 1, 1, 1},
+    { 1, 1, 1},
+    { 1, 1, 1}
+};
+
+unsigned int sum_r, sum_g, sum_b;
+
+for( int i = 0; i < SIZE; i++ )
+{
+    for( int j = 0; j < SIZE; j++ )
+    {
+        int idx = (x + i - SIZE / 2 + 
+            (y + j - SIZE /2) * w) * 3;
+        
+        if( TEST_INDEX(index, w*h * 3))
+        {
+            sum_r += kernel[i][j] * 
+                     img_original[idx];
+            sum_g += kernel[i][j] *
+                     img_original[idx+1];
+            sum_b += kernel[i][j] *
+                     img_original[idx+2];
+        }
+    }
+}
+
+sum_g /= 9; sum_b /= 9; sum_r /= 9;
+
+\end{minted}
+
+Bij deze code is \mintinline{c}{TEST_INDEX} een macro die voorkomt dat we waardes opvragen buiten het array. Dit is nodig omdat pixels aan de randen geen buren hebben. Er zijn meerdere oplossingen hiervoor, een eerste is dus om deze waarden gewoon te negeren. Hierdoor lopen we wel het risico om zwarte randen rond de afbeelding te verkrijgen. Een andere oplossing is om pixelwaarden van de andere kant van de afbeelding te gebruiken of door de pixels aan de rand opnieuw te kopieren. 
+
+De edge detection filter die we uiteindelijk toegepast hebben is een combinatie van 2 andere filters:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        1 & 2 & 1 \\ \hline
+        0 & 0 & 0 \\ \hline
+        -1 & -2 & -1 \\
+        \hline
+    \end{tabular}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        1 & 0 & -1 \\ \hline
+        2 & 0 & -2 \\ \hline
+        1 & 0 & -1 \\
+        \hline
+    \end{tabular}
+    \caption{Horizontale en verticale edge detection kernels}
+\end{table}
+
+Deze 2 filters leveren 2 waarden op, $G_x$ en $G_y$. We combineren deze om de uiteindelijke pixelwaarde te bekomen: $G = \sqrt{G_x^2 + G_y^2 }$. 
+
+\section{Vergelijking}
+
+We hebben 3 soorten filters getest: de grayscale filter(2 afbeeldingen), de 2D Sobel filter(4 afbeeldingen) en tot slot een 5x5 gaussian blur filter(4 afbeeldingen). 
+
+We testen op de volgende afbeeldingen:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Naam} & \textbf{Breedte} & \textbf{Hoogte} \\ \hline
+    Zebra.jpeg    & 1200             & 798             \\ \hline
+    wikipedia.png & 640              & 480             \\ \hline
+    groot.jpg     & 10240            & 6400            \\ \hline
+    mountain.jpeg & 18300            & 6875            \\ \hline
+    \end{tabular}
+    \caption{De gebruikte afbeeldingen}
+\end{table}
+
+Op de grafieken is te zien hoe de operaties op de GPU altijd sneller zijn, behalve bij de afbeelding van de zebra. Dit is te verklaren door de grayscale operatie zelf. We zitten immers de waarden van de groene en blauwe component gelijk aan de rode component zonder berekeningen. Er is dus veel extra overhead bij het uploaden en downloaden van de data en deze tijd wordt niet goedgemaakt door de snelheid van de GPU. Bij het toepassen van de kernels zijn er wel heel wat meer berekeningen waardoor er een flinke snelheidstoename is.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.43\textwidth]{grayscaling.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor grayscaling}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.43\textwidth]{gaussian_blur.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor gaussian blur (5x5)}
+    \label{blocksize}
+\end{figure}
+
 \section{Besluit}
+Het gebruik van de GPU voor bewerkingen op afbeeldingen biedt meestal een snelheidwinst van 40\% tot 250\%. Zeker voor grote afbeeldingen zien we de grootste winst. Bij kleine afbeeldingen daarintegen, wordt een deel van deze winst door overhead tenietgedaan.
+
+Daarnaast hebben we ook kennis gemaakt met enkele elementaire afbeeldingtransformaties, zoals gaussiaans vervagen en randdetectie, beiden op basis van kernels. Deze tranformaties zijn eenvoudig parallel te implementeren op een GPU, waarbij we bovenstaande performantie-verbeteringen hebben waargenomen.
+
+Bij het gebruik van deze kernels, hebben we ook moeten nadenken over hoe omgegaan wordt met de randen, bij een naieve implementatie zouden er namelijk zwarte randen rond de afbeelding ontstaan.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.43\textwidth]{edge_detection.eps}
+    \caption{Executietijd $\frac{gpu}{cpu}$ \% voor edge detection (2D Sobel)}
+    \label{blocksize}
+\end{figure}
+
 
 \onecolumn
 
 \appendix
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{test.jpg}
+    \caption{Zebra.jpg}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{output_zebra.png}
+    \caption{Het resultaat van zebra.jpg na de Sobel filter}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{wikipedia.PNG}
+    \caption{Wikipedia.png}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{wikipedia_output.png}
+    \caption{Het resultaat van Wikipedia.png na de Sobel filter}
+    \label{blocksize}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{groot.png}
+    \caption{groot.jpg}
+    \label{blocksize}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{mountain.png}
+    \caption{mountain.joeg}
+    \label{blocksize}
+\end{figure}
+
+\newpage
+
 \inputminted[tabsize=4,obeytabs]{c}{labo2.c}
+\newpage
+\inputminted[tabsize=4,obeytabs]{c}{labo2_gray.c}
 
 % The appendix command is issued once, prior to all appendices, if any.
 %\appendix
