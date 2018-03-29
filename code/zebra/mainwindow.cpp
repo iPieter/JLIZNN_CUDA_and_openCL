@@ -5,7 +5,13 @@
 #include <CL/cl.h>
 #endif
 
+#include <QtGui>
+#include <QLabel>
+#include <QListWidgetItem>
+#include <QSizePolicy>
+#include <QListWidget>
 #include <QGraphicsScene>
+#include <QPushButton>
 #include <QTextStream>
 #include <QTimer>
 #include <QPixmap>
@@ -25,6 +31,33 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    QPushButton *button = new QPushButton("");
+
+    //button->setObjectName(QStringLiteral("btn_gaussian_blur"));
+    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(button->sizePolicy().hasHeightForWidth());
+    button->setSizePolicy(sizePolicy);
+    button->setMaximumSize(QSize(44, 44));
+    button->setBaseSize(QSize(44, 44));
+
+    QIcon icon;
+    icon.addFile(QStringLiteral(":/icons/icons/btn_mask.png"), QSize(), QIcon::Normal, QIcon::Off);
+    button->setIcon(icon);
+    button->setIconSize(QSize(42, 42));
+
+    connect(button, SIGNAL (pressed()), this, SLOT (on_btn_gaussian_blur_pressed()));
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(button);
+
+    ui->kernels->addLayout(layout);
+
+    //set the layout of the kernel view
+    ui->kernels->setAlignment(Qt::AlignTop);
+    ui->kernels->setSpacing(0);
 }
 
 MainWindow::~MainWindow()
@@ -53,6 +86,12 @@ void MainWindow::on_pushButton_pressed()
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));
     ui->mainImage->setScene(scene);
+
+    QLabel* title = new QLabel("Grayscale");
+    title->setStyleSheet("border-bottom: 5px solid #f5f6fa; text-transform: uppercase; color: #f5f6fa");
+
+    ui->kernels->addWidget(title);
+    //window.setLayout(layout);
 
     scene->setSceneRect(image.rect());
 
@@ -98,7 +137,7 @@ void MainWindow::on_pushButton_2_pressed()
     scene->setSceneRect(image.rect());
 }
 
-void MainWindow::on_pushButton_3_pressed()
+void MainWindow::on_btn_gaussian_blur_pressed()
 {
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*3*sizeof(unsigned char) );

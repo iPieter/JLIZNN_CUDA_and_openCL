@@ -38,12 +38,12 @@ private slots:
     void on_pushButton_pressed();
     void on_horizontalSlider_sliderMoved(int position);
     void on_pushButton_2_pressed();
-    void on_pushButton_3_pressed();
     void on_horizontalSlider_valueChanged(int value);
     void on_pushButton_4_pressed();
     void on_horizontalSlider_4_valueChanged(int value);
     void on_horizontalSlider_3_valueChanged(int value);
     void on_horizontalSlider_2_valueChanged(int value);
+    void on_btn_gaussian_blur_pressed();
 };
 
 

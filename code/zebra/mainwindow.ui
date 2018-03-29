@@ -15,7 +15,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton{
-border: 1px solid #353b48;
+border: 0;
 padding: 5px;
 background-color: #2b2e37;
 color: #fcfcfc;
@@ -27,10 +27,43 @@ background: #353b48;
 
 QMainWindow {
 background: #2b2e37;
+}
+
+QListView {
+background: #2b2e37;
+border: 0;
 }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QGraphicsView" name="mainImage">
+          <property name="styleSheet">
+           <string notr="true">background: #353b48;
+border: 0;
+margin: 0;
+padding: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="kernels">
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
@@ -43,14 +76,52 @@ background: #2b2e37;
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>Test</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../Downloads/icons8-normal-distribution-histogram-50.png</normaloff>../../../../../../../Downloads/icons8-normal-distribution-histogram-50.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>50</width>
+          <height>50</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="btn_gaussian_blur">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>44</width>
+          <height>44</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>44</width>
+          <height>44</height>
+         </size>
+        </property>
         <property name="text">
-         <string>PushButton</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/icons/icons/btn_mask.png</normaloff>:/icons/icons/btn_mask.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>42</width>
+          <height>42</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -95,16 +166,6 @@ background: #2b2e37;
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="horizontalSlider_3">
-        <property name="maximum">
-         <number>255</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QSlider" name="horizontalSlider_2">
         <property name="maximum">
          <number>255</number>
@@ -114,16 +175,17 @@ background: #2b2e37;
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider_3">
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QGraphicsView" name="mainImage">
-      <property name="styleSheet">
-       <string notr="true">background: #2b2e37;
-border: 0;
-margin: 0;</string>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
@@ -286,10 +348,9 @@ margin: 0;</string>
  <tabstops>
   <tabstop>pushButton_2</tabstop>
   <tabstop>pushButton</tabstop>
-  <tabstop>pushButton_3</tabstop>
-  <tabstop>mainImage</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
-

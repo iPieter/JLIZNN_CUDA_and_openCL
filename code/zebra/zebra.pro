@@ -40,3 +40,9 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+DISTFILES += \
+    btn_gaussian_blur.png
+
+RESOURCES += \
+    resources.qrc

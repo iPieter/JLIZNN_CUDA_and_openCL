@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/btn_gaussian_blur.png</file>
+        <file>icons/btn_mask.png</file>
+    </qresource>
+</RCC>
