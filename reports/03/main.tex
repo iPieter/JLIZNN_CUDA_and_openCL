@@ -55,15 +55,20 @@ Tenslotte wordt \emph{Docker Swarm} bekeken in Subsectie~\ref{ss:swarm} en hoe d
 \subsection{Message brokers}\label{ss:broker}
 Een \emph{message broker} kadert in \emph{message-oriented middleware}, waarbij applicaties asynchroon data kunnen sturen en ontvangen. Hierbij sturen alle applicaties berichten naar een \emph{broker}, die deze berichten dan weer doorstuurt.
 
-Hierbij is 
-
 \begin{figure}[htb]
     \centering
     \includegraphics[width=0.45\textwidth]{exchanges-topic-fanout-direct.png}
+    \caption{Illustratie van een \emph{message broker}.}\label{fig:broker}
 \end{figure}
 
+De applicaties die berichten produceren worden \emph{producers} genoemd en de applicaties die ze consumeren noemen \emph{consumers}. De producers sturen berichten naar een \emph{exchange} op de broker. Op basis van een criterium worden deze berichten dan doorgestuurd naar een wachtrij (\emph{queue}) op de broker, waarop een consumer zich kan abonneren.
+
+Het gebruik van een broker heeft enkele voordelen. Zo is er een ontkoppeling van applicaties; er zijn dus geen directe connecties nodig. Vooral de setup is hierdoor eenvoudiger. 
+
+Ook is er automatisch een vorm van \emph{load balancing}, aangezien meerdere consumers zich kunnen abonneren op een gedeelde wachtrij. Mocht een consumer uitvallen, kunnen de andere consumers dit automatisch opvangen. 
 
 \subsection{Stream-verwerking}\label{ss:stream}
+
 \subsection{Docker Swarm}\label{ss:swarm}
 \subsection{Rapberry Pi}\label{ss:rpi}
 
