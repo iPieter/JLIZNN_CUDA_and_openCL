@@ -57,7 +57,7 @@ Een \emph{message broker} kadert in \emph{message-oriented middleware}, waarbij 
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=0.45\textwidth]{exchanges-topic-fanout-direct.png}
+    \includegraphics[width=0.43\textwidth]{exchanges-topic-fanout-direct.png}
     \caption{Illustratie van een \emph{message broker}.}\label{fig:broker}
 \end{figure}
 
@@ -67,8 +67,19 @@ Het gebruik van een broker heeft enkele voordelen. Zo is er een ontkoppeling van
 
 Ook is er automatisch een vorm van \emph{load balancing}, aangezien meerdere consumers zich kunnen abonneren op een gedeelde wachtrij. Mocht een consumer uitvallen, kunnen de andere consumers dit automatisch opvangen. 
 
+In dit geval wordt RabbitMQ gebruikt. Dit is een \emph{polyglot broker}, wat een mooie uitdrukking is om aan te geven dat meerdere protocollen ondersteund worden, zoals MQTT, AMQP en WebSTOMP.
+
 \subsection{Stream-verwerking}\label{ss:stream}
-\emph{Stream processing} is een veelgebruikte architectuur voor operaties uit te voeren op een stroom van data. In een gedistribueerde context zijn systemen voor zoals Heron, waarbij operatoren
+\emph{Stream processing} is een veelgebruikte architectuur voor operaties uit te voeren op een stroom van data. In een gedistribueerde context zijn hier systemen voor zoals Heron. Hierbij voeren operatoren allemaal kleine operaties uit, waarbij de voorkeur wordt gegeven aan atomaire staatloze operaties.
+
+Om operatoren met elkaar te verbinden, kan een systeem zoals in Figuur~\ref{fig:operator-queue} gebruikt worden. Hierbij stuurt iedere operator een bericht met een vooraf vastgelegde \emph{topic ID}. Iedere operator abonneert zich dan ook op een vooraf vastgelegde queue, of maakt deze aan mocht die nog niet bestaan. 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.43\textwidth]{operator_queue}
+    \caption{Illustratie van hoe een broker\\tussen operators geïntegreerd zit.}\label{fig:operator-queue}
+\end{figure}
+
 \subsection{Docker Swarm}\label{ss:swarm}
 \subsection{Rapberry Pi}\label{ss:rpi}
 
