@@ -23,6 +23,7 @@ public slots:
 private:
     void createFilter(double **gKernel, int size);
     int createFilter(int **gKernel, int size);
+    int printDevices();
 
     Ui::MainWindow *ui;
     QGraphicsScene *scene;

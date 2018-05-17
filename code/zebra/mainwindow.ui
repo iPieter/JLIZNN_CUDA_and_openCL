@@ -43,7 +43,7 @@ background: #2b2e37;
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>Test</string>
+         <string>load image</string>
         </property>
        </widget>
       </item>
@@ -126,44 +126,6 @@ margin: 0;</string>
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>524</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
-    <addaction name="actionSave_as"/>
-    <addaction name="actionPrint"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="actionCopy"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionPaste"/>
-    <addaction name="separator"/>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
-    <addaction name="actionFont"/>
-    <addaction name="separator"/>
-    <addaction name="actionSout"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -292,4 +254,3 @@ margin: 0;</string>
  <resources/>
  <connections/>
 </ui>
-

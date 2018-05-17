@@ -1,9 +1,7 @@
 % PP-Article.tex for AEA last revised 22 June 2011
-\documentclass[10pt, twocolumn, a4paper]{article}
+\documentclass[twocolumn, a4paper]{article}
 
-%%%%%% NOTE FROM OVERLEAF: The mathtime package is no longer publicly available nor distributed. We recommend using a different font package e.g. mathptmx if you'd like to use a Times font.
-\usepackage{mathptmx}
-\usepackage{amsmath}
+%\usepackage{amsmath}
 \usepackage[dutch]{babel}
 \usepackage{subcaption}
 \usepackage[width=.8\textwidth]{caption}
@@ -30,9 +28,9 @@
 %\usepackage{natbib}
 \usepackage{titlesec}
 
-\titlespacing*\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
-\titlespacing*\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
-\titlespacing*\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+%\titlespacing*\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+%\titlespacing*\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+%\titlespacing*\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
 
 % Uncomment the next line to use the harvard package with bibtex
 %\usepackage[abbr]{harvard}
@@ -41,8 +39,8 @@
 % with 1.5 corresponding to "double" spacing.
 \begin{document}
 
-\title{Geavanceerde computerarchitectuur: Labo 02 \\ 
-\large{Bewerkingen op afbeeldingen}}
+\title{Geavanceerde computerarchitectuur: Labo 03 \\ 
+\large{Parallel computing via Raspberry Pi's}}
 \author{\textsc{Anton Danneels en Pieter Delobelle}}
 \date{}
 \maketitle
@@ -50,6 +48,24 @@
 \section{Inleiding}
 
 \section{Analyse}
+Deze sectie zal ingaan op de gebruikte technieken en relevante concepten. Het eerste concept is dat van \emph{message brokers}, wat in Subsectie~\ref{ss:broker} wordt uitgediept. Hierna wordt ingegaan op hoe dit gebruikt kan worden in de context van gedistribueerde stream-verwerking in Subsectie~\ref{ss:stream}. 
+
+Tenslotte wordt \emph{Docker Swarm} bekeken in Subsectie~\ref{ss:swarm} en hoe dit kan gebruikt worden op een Raspberry Pi in Subsectie~\ref{ss:rpi}.
+
+\subsection{Message brokers}\label{ss:broker}
+Een \emph{message broker} kadert in \emph{message-oriented middleware}, waarbij applicaties asynchroon data kunnen sturen en ontvangen. Hierbij sturen alle applicaties berichten naar een \emph{broker}, die deze berichten dan weer doorstuurt.
+
+Hierbij is 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.45\textwidth]{exchanges-topic-fanout-direct.png}
+\end{figure}
+
+
+\subsection{Stream-verwerking}\label{ss:stream}
+\subsection{Docker Swarm}\label{ss:swarm}
+\subsection{Rapberry Pi}\label{ss:rpi}
 
 \section{Oplossing}
 
@@ -84,4 +100,3 @@ pi@raspberrypi:~/Documents $
 % The appendix command is issued once, prior to all appendices, if any.
 %\appendix
 \end{document}
-
