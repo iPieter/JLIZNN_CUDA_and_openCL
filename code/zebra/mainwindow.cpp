@@ -10,6 +10,7 @@
 #include <QTextStream>
 #include <QTimer>
 #include <QPixmap>
+#include <QSignalMapper>
 
 #include <algorithm>    // std::max
 
@@ -27,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
+    //show openCL devices
     printDevices();
 }
 
@@ -295,6 +298,8 @@ int MainWindow::printDevices() {
     platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
     clGetPlatformIDs(platformCount, platforms, NULL);
 
+    enabled_devices = new int *[platformCount];
+
     for (i = 0; i < platformCount; i++) {
 
         // get all devices
@@ -302,8 +307,12 @@ int MainWindow::printDevices() {
         devices = (cl_device_id*) malloc(sizeof(cl_device_id) * deviceCount);
         clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);
 
+        enabled_devices[i] = new int[deviceCount];
+
         // for each device print critical attributes
         for (j = 0; j < deviceCount; j++) {
+
+            enabled_devices[i][j] = 0;
 
             // print device name
             clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &valueSize);
@@ -312,47 +321,17 @@ int MainWindow::printDevices() {
             printf("%d. Device: %s\n", j+1, value);
             free(value);
 
-            // print hardware device version
-            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, 0, NULL, &valueSize);
-            value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, valueSize, value, NULL);
-            printf(" %d.%d Hardware version: %s\n", j+1, 1, value);
-            free(value);
+            QAction* newAct = new QAction(tr(value), this);
+            newAct->setCheckable(true);
+            //newAct->setShortcuts(QKeySequence::New);
+            newAct->setStatusTip(tr("Create a new file"));
 
-            // print software driver version
-            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, 0, NULL, &valueSize);
-            value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, valueSize, value, NULL);
-            printf(" %d.%d Software version: %s\n", j+1, 2, value);
-            free(value);
+            connect(newAct, &QAction::toggled, this, [this, newAct, i, j](){
+                this->toggleDevice(i, j, newAct->isChecked());
+            });
 
-            // print c version supported by compiler for device
-            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &valueSize);
-            value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, valueSize, value, NULL);
-            printf(" %d.%d OpenCL C version: %s\n", j+1, 3, value);
-            free(value);
+            ui->menuWindow->addAction(newAct);
 
-            // print parallel compute units
-            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
-                    sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Parallel compute units: %d\n", j+1, 4, maxComputeUnits);
-
-            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY,
-                    sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Frequency: %d\n", j+1, 4, maxComputeUnits);
-
-            clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE,
-                    sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Global memory size: %d\n", j+1, 4, maxComputeUnits);
-
-            clGetDeviceInfo(devices[j], CL_DEVICE_LOCAL_MEM_SIZE,
-                    sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Local memory size: %d\n", j+1, 4, maxComputeUnits);
-
-            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_WORK_GROUP_SIZE,
-                    sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Worker group size: %d\n", j+1, 4, maxComputeUnits);
 
         }
 
@@ -362,47 +341,24 @@ int MainWindow::printDevices() {
 
     free(platforms);
 
-
-    char* info;
-    size_t infoSize;
-    const char* attributeNames[5] = { "Name", "Vendor",
-        "Version", "Profile", "Extensions" };
-    const cl_platform_info attributeTypes[5] = { CL_PLATFORM_NAME, CL_PLATFORM_VENDOR,
-        CL_PLATFORM_VERSION, CL_PLATFORM_PROFILE, CL_PLATFORM_EXTENSIONS };
-    const int attributeCount = sizeof(attributeNames) / sizeof(char*);
-
-    // get platform count
-    clGetPlatformIDs(5, NULL, &platformCount);
-
-    // get all platforms
-    platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
-    clGetPlatformIDs(platformCount, platforms, NULL);
-
-    // for each platform print all attributes
-    for (i = 0; i < platformCount; i++) {
-
-        printf("\n %d. Platform \n", i+1);
-
-        for (j = 0; j < attributeCount; j++) {
-
-            // get platform attribute value size
-            clGetPlatformInfo(platforms[i], attributeTypes[j], 0, NULL, &infoSize);
-            info = (char*) malloc(infoSize);
-
-            // get platform attribute value
-            clGetPlatformInfo(platforms[i], attributeTypes[j], infoSize, info, NULL);
-
-            printf("  %d.%d %-11s: %s\n", i+1, j+1, attributeNames[j], info);
-            free(info);
-
-        }
-
-        printf("\n");
-
-    }
-
-    free(platforms);
-
     return 0;
+
+}
+
+void MainWindow::toggleDevice(int platform, int device, bool toggle)
+{
+    enabled_devices[platform][device] = toggle;
+
+    int platforms =  sizeof enabled_devices / sizeof enabled_devices[0];
+
+    for( int i = 0; i < platforms; i++ )
+    {
+        int devices = sizeof enabled_devices[i] / sizeof(int);
+
+        for( int j = 0; j <= devices; j++ )
+        {
+            QTextStream(stdout) << "Device: " << i << ", " << j << ": " << enabled_devices[i][j] << '\n';
+        }
+    }
 
 }

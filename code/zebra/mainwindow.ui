@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Notepad</string>
+   <string>Zebra</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>zebra.icns</normaloff>zebra.icns</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton{
@@ -127,120 +131,32 @@ margin: 0;</string>
     </item>
    </layout>
   </widget>
-  <action name="actionNew">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/new.png</normaloff>:/images/new.png</iconset>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>524</width>
+     <height>22</height>
+    </rect>
    </property>
-   <property name="text">
-    <string>New</string>
-   </property>
-  </action>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuWindow"/>
+  </widget>
   <action name="actionOpen">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/open.png</normaloff>:/images/open.png</iconset>
-   </property>
    <property name="text">
-    <string>Open</string>
-   </property>
-  </action>
-  <action name="actionSave">
-   <property name="icon">
-    <iconset>
-     <normaloff>../../../Desktop/save.png</normaloff>../../../Desktop/save.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionSave_as">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/save_as.png</normaloff>:/images/save_as.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save as</string>
-   </property>
-  </action>
-  <action name="actionPrint">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/print.png</normaloff>:/images/print.png</iconset>
-   </property>
-   <property name="text">
-    <string>Print</string>
-   </property>
-  </action>
-  <action name="actionExit">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/exit.png</normaloff>:/images/exit.png</iconset>
-   </property>
-   <property name="text">
-    <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionCopy">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/copy.png</normaloff>:/images/copy.png</iconset>
-   </property>
-   <property name="text">
-    <string>Copy</string>
-   </property>
-  </action>
-  <action name="actionCut">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/cut.png</normaloff>:/images/cut.png</iconset>
-   </property>
-   <property name="text">
-    <string>Cut</string>
-   </property>
-  </action>
-  <action name="actionPaste">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/paste.png</normaloff>:/images/paste.png</iconset>
-   </property>
-   <property name="text">
-    <string>Paste</string>
-   </property>
-  </action>
-  <action name="actionUndo">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/edit_undo.png</normaloff>:/images/edit_undo.png</iconset>
-   </property>
-   <property name="text">
-    <string>Undo</string>
-   </property>
-  </action>
-  <action name="actionRedo">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/edit_redo.png</normaloff>:/images/edit_redo.png</iconset>
-   </property>
-   <property name="text">
-    <string>Redo</string>
-   </property>
-  </action>
-  <action name="actionFont">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/images/font.png</normaloff>:/images/font.png</iconset>
-   </property>
-   <property name="text">
-    <string>Font</string>
-   </property>
-  </action>
-  <action name="actionSout">
-   <property name="text">
-    <string>Sout</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Open...</string>
    </property>
   </action>
  </widget>

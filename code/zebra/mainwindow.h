@@ -24,7 +24,7 @@ private:
     void createFilter(double **gKernel, int size);
     int createFilter(int **gKernel, int size);
     int printDevices();
-
+    void toggleDevice(int platform, int device, bool toggle);
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     QPixmap image;
@@ -34,6 +34,8 @@ private:
     int r,g,b;
 
     int kernel_size = 5;
+
+    int **enabled_devices;
 
 private slots:
     void on_pushButton_pressed();
