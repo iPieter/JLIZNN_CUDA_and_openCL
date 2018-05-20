@@ -202,7 +202,7 @@ Om het systeem te evalueren, wordt het aantal operatoren dat getallen factorisee
 
 Het resultaat van deze metingen en latere berekeningen is te zien in Tabel~\ref{tab:meaurements} en grafisch in Figuur~\ref{fig:metingen}. Ook is het tempo waarin de bron berichten publiceert weergegeven, waaruit duidelijk valt op te merken dat het systeem afkapt op 20 berichten per seconde. 
 
-Een tweede, interessantere observatie is het verschil tussen de meetwaarden en een lineaire schaling. Deze schaling is een schatting van de verwerkingscapaciteit op basis van de eerste operator. Aangezien een operator aan een frequentie $f_1 = 3,58$ Hz berichten verwerkt, zou een redelijke schatting kunnen zijn dat dit aantal verdubbelt voor 2 operatoren.
+Een tweede, interessantere observatie is het verschil tussen de meetwaarden en een lineaire schaling. Deze schaling is een schatting van de verwerkingscapaciteit op basis van de eerste operator. Aangezien een operator aan een gemiddelde frequentie $\overline{f_1} = 3,58$ Hz berichten verwerkt, zou een redelijke schatting kunnen zijn dat dit aantal verdubbelt voor 2 operatoren.
 
 De meetwaarden liggen echter boven deze lineaire schaling, wat gezien bovenstaande redenering dus onverwachts zou kunnen zijn. Dit fenomeen is echter volledig te verklaren door de eerder besproken architectuur; wat nog maar eens de kracht van dit soort systemen in de verf zet.
 
@@ -214,7 +214,8 @@ In de voorgaande secties zijn \emph{message brokers}, stream-verwerking en Docke
 
 Om de performantie en schaalbaarheid te evalueren, is gekozen om getallen te factoriseren, waarbij dit de bottleneck vormt. Hiermee zijn dan metingen gedaan voor een variabel aantal operatoren. 
 
-Uit deze metingen blijkt dat het systeem lineair schaalt en nog additionele voordelen heeft van automatische \emph{load balancing} 
+Uit deze metingen blijkt dat het systeem lineair schaalt en nog additionele voordelen heeft van automatische \emph{load balancing}.
+
 
 
 \onecolumn
@@ -263,8 +264,35 @@ pi@raspberrypi:~/Documents $
 \inputminted[breaklines=true]{python}{code/output.py}
 
 \section{Dockerfile operatoren}
-Omwille van een verschillende implementatie van node.js voor ARM of i86, moet er een speciale versie van de docker container voor node gekozen worden. 
+Omwille van een verschillende implementatie van node.js voor ARM of i86, moet er een speciale versie van de Docker container voor node gekozen worden. 
 \inputminted[breaklines=true]{docker}{code/Dockerfile}
+
+\section{Metingen}
+\begin{figure*}[htb]
+    \centering
+    \begin{subfigure}{0.88\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{1_operator}        
+    \end{subfigure}  
+    \begin{subfigure}{0.88\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{2_operator}        
+    \end{subfigure}  
+    \begin{subfigure}{0.88\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3_operator}        
+    \end{subfigure}  
+    \begin{subfigure}{0.88\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{4_operator}        
+    \end{subfigure}
+    \begin{subfigure}{0.88\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{5_operator}        
+    \end{subfigure}  
+\end{figure*}
+
+\newpage
 
 % The appendix command is issued once, prior to all appendices, if any.
 %\appendix
