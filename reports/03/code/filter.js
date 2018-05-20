@@ -11,11 +11,11 @@ connection.on('error', on_error);
 
 // Wait for connection to become established.
 connection.on('ready', function () {
-    let current = 'filter';
+    let current = 'text';
 
-    connection.queue('filter', function (q) {
+    connection.queue('text', function (q) {
         // Catch all messages
-        q.bind('amq.topic', 'filter');
+        q.bind('amq.topic', 'text');
 
         connection.exchange('amq.topic', options = {}, function (exchange) {
 

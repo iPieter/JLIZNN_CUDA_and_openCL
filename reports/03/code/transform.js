@@ -40,7 +40,7 @@ connection.on('ready', function () {
             // Receive message
             q.subscribe(function (message) {
                 fact = JSON.parse(message.data.toString());
-                exchange.publish('filter', {"value": findPrimeFactors(fact.value)}, {contentType: 'text/plain'});
+                exchange.publish('text', {"value": findPrimeFactors(fact.value)}, {contentType: 'text/plain'});
             });
         });
     });

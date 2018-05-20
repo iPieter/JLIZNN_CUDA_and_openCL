@@ -288,7 +288,7 @@ int MainWindow::printDevices() {
     cl_platform_id* platforms;
     cl_uint deviceCount;
     cl_device_id* devices;
-    cl_uint maxComputeUnits;
+    cl_ulong maxComputeUnits;
 
     // get all platforms
     clGetPlatformIDs(0, NULL, &platformCount);
@@ -350,9 +350,9 @@ int MainWindow::printDevices() {
                     sizeof(maxComputeUnits), &maxComputeUnits, NULL);
             printf(" %d.%d Local memory size: %d\n", j+1, 4, maxComputeUnits);
 
-            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
+            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_WORK_GROUP_SIZE,
                     sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Buffer memory size: %d\n", j+1, 4, maxComputeUnits);
+            printf(" %d.%d Worker group size: %d\n", j+1, 4, maxComputeUnits);
 
         }
 
