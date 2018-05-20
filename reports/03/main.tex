@@ -88,9 +88,9 @@ Om operatoren met elkaar te verbinden, kan een systeem zoals in Figuur~\ref{fig:
 
 
 \subsection{Docker Swarm}\label{ss:swarm}
-\todo[inline]{hier heb ik geen zin in, dit is voor anton}
-\subsection{Rapberry Pi}\label{ss:rpi}
-\todo[inline]{hier heb ik geen zin in, dit is voor anton}
+Docker is een technologie die het mogelijk maakt om applicaties in \emph{containers} uit te voeren. Het doel van deze containers is om de illusie op te wekken dat deze applicaties op een apart besturingssysteem draaien. Hierdoor is het mogelijk om alleen de benodigde software te installeren. Docker Swarm is een technologie bovenop Docker die het mogelijk maakt om automatisch containers uit te voeren op een collectie van apparaten.
+
+Er zijn twee soorten nodes, managers en workers. Managers zullen automatisch werkers uitkiezen waar containers op moeten draaien. Daarnaast heeft Docker Swarm features zoals automatische \emph{load balancing} en \emph{container registries}, waardoor nodes in de swarm hun container kunnen downloaden van een manager.
 
 \section{Oplossing}
 
@@ -208,6 +208,7 @@ De meetwaarden liggen echter boven deze lineaire schaling, wat gezien bovenstaan
 
 De generatie van willekeurige nummers genereert zowel nummers die snel gefactoriseerd kunnen worden als nummers waarop langer gerekend moet worden. Bij één operator zullen al deze problemen sequentieel afgehandeld moeten worden, wat de gemiddelde tijd omlaag brengt. Bij meerdere operatoren is echter automatisch \emph{load balancing}. Mocht een operator dus langer moeten rekenen, blijven de andere beschikbaar voor de kortere taken af te handelen.
 
+\newpage
 
 \section{Besluit}
 In de voorgaande secties zijn \emph{message brokers}, stream-verwerking en Docker Swarm geïntroduceerd. Op basis van deze technieken is een \emph{distributed stream processing system} geïmplementeerd voor een Raspberry Pi-cluster. 
