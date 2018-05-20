@@ -136,14 +136,14 @@ Om een volledig, dynamisch systeem te definiëren, zou een generieke operator ge
 Wat betreft de \emph{source}- en \emph{sink}-operatoren, wordt er gekozen voor een implementatie in Python. Deze systemen zitten niet in een Docker-container, aangezien dit in een reëele situatie ook niet het geval zal zijn. De code voor beide systemen is te vinden in de appendices.
 
 Om het aantal operatoren te schalen, wordt gebruik gemaakt van de schaal-functionaliteit van Docker Swarm. Dit systeem verdeelt alle operatoren automatisch over de nodes in de swarm.
-
+ 
 \begin{minted}{console}
     docker service scale <ID>=<NR>
 \end{minted}
 
 In Appendix~\ref{appendix:schalen} is het resultaat van zo'n operatie weergegeven. 
 
-Daarnaast is de broker, RabbitMQ, op een van de Rasberry Pi's gehost. Eveneens in een Docker container. Deze container kan opgezet worden met de volgende Dockerfile.
+Daarnaast is de broker, RabbitMQ, op een van de Raspberry Pi's gehost. Eveneens in een Docker container. Deze container kan opgezet worden met de volgende Dockerfile.  
 
 \begin{minted}{docker}
 FROM rabbitmq
@@ -177,21 +177,46 @@ docker run
 \end{minted}
 
 \section{Resultaten}
-\begin{figure}[bt]
+\begin{figure}[b]
     \centering
-    \includegraphics[width=0.45\textwidth]{metingen}
+    \includegraphics[width=0.49\textwidth]{metingen}
     \caption{Meetwaarden met lineaire schaling.}\label{fig:metingen}
 \end{figure}
 
-\begin{figure*}[htb]
+\begin{table*}[]
     \centering
-    \includegraphics[width=0.9\textwidth]{main_1_2}
-    \caption{Screenshot van RabbitMQ met één transform-operator. De filter-queue is de tweede operatie.}\label{fig:dashboard}
-\end{figure*}
-Om het systeem te evalueren, wordt het aantal operatoren dat getallen factoriseert geschaald. 
+    \begin{tabular}{@{}llrr@{}}
+    \toprule
+    Operatoren & Metingen  & Gemiddelde wachttijd [s]                                       & Gemiddelde frequentie [Hz] \\ \midrule
+    1          & 500       & $0,2790 $                                              & $3,58$                     \\
+    2          & 500       & $0,1200 $                                              & $8,33$                     \\
+    3          & 500       & $0,0800$                                             & $12,50$                     \\
+    4          & 500       & $0,0599$                                            & $16,70$                     \\
+    5          & 500       & $0,0499$                                             & $20,00$                     \\
+    6          & 500       & $0,0400$                                             & $20,00$                     \\ \bottomrule
+    \end{tabular}
+    \caption{Metingen}\label{tab:meaurements}
+\end{table*}
+
+Om het systeem te evalueren, wordt het aantal operatoren dat getallen factoriseert geschaald. De source-operator publiceert getallen naar RabbitMQ aan een tempo $f_{s} = 20$ Hz. Deze worden door het systeem verwerkt en gedownload door de sink-operator. Hier worden ze van een timestamp voorzien, waarna later de gemiddelde wachttijd tussen ieder bericht wordt berekend. Dit wordt voor 500 berichten gedaan per meting, waarbij geschaald wordt tot 6 operatoren.
+
+Het resultaat van deze metingen en latere berekeningen is te zien in Tabel~\ref{tab:meaurements} en grafisch in Figuur~\ref{fig:metingen}. Ook is het tempo waarin de bron berichten publiceert weergegeven, waaruit duidelijk valt op te merken dat het systeem afkapt op 20 berichten per seconde. 
+
+Een tweede, interessantere observatie is het verschil tussen de meetwaarden en een lineaire schaling. Deze schaling is een schatting van de verwerkingscapaciteit op basis van de eerste operator. Aangezien een operator aan een frequentie $f_1 = 3,58$ Hz berichten verwerkt, zou een redelijke schatting kunnen zijn dat dit aantal verdubbelt voor 2 operatoren.
+
+De meetwaarden liggen echter boven deze lineaire schaling, wat gezien bovenstaande redenering dus onverwachts zou kunnen zijn. Dit fenomeen is echter volledig te verklaren door de eerder besproken architectuur; wat nog maar eens de kracht van dit soort systemen in de verf zet.
+
+De generatie van willekeurige nummers genereert zowel nummers die snel gefactoriseerd kunnen worden als nummers waarop langer gerekend moet worden. Bij één operator zullen al deze problemen sequentieel afgehandeld moeten worden, wat de gemiddelde tijd omlaag brengt. Bij meerdere operatoren is echter automatisch \emph{load balancing}. Mocht een operator dus langer moeten rekenen, blijven de andere beschikbaar voor de kortere taken af te handelen.
 
 
 \section{Besluit}
+In de voorgaande secties zijn \emph{message brokers}, stream-verwerking en Docker Swarm geïntroduceerd. Op basis van deze technieken is een \emph{distributed stream processing system} geïmplementeerd voor een Raspberry Pi-cluster. 
+
+Om de performantie en schaalbaarheid te evalueren, is gekozen om getallen te factoriseren, waarbij dit de bottleneck vormt. Hiermee zijn dan metingen gedaan voor een variabel aantal operatoren. 
+
+Uit deze metingen blijkt dat het systeem lineair schaalt en nog additionele voordelen heeft van automatische \emph{load balancing} 
+
+
 \onecolumn
 
 \appendix
@@ -215,6 +240,14 @@ waucpjaqe1g7        silly_hamilton      replicated          3/3                 
 pi@raspberrypi:~/Documents $ 
 \end{minted}
 
+\section{Schermafbeelding van RabbitMQ}
+\begin{figure*}[htb]
+    \centering
+    \includegraphics[width=0.9\textwidth]{main_1_2}
+    \caption{Screenshot van RabbitMQ met één transform-operator. De filter-queue is de tweede operatie.}\label{fig:dashboard}
+\end{figure*}
+
+\newpage
 
 \section{spout.py}
 \inputminted[breaklines=true]{python}{code/spout.py}
