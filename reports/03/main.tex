@@ -32,7 +32,7 @@
 %\titlespacing*\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
 %\titlespacing*\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
 
-% Uncomment the next line to use the harvard package with bibtex
+% Uncomment the next line to use the harvard package with bibtex`
 %\usepackage[abbr]{harvard}
 
 % This command determines the leading (vertical space between lines) in draft mode
@@ -177,6 +177,12 @@ docker run
 \end{minted}
 
 \section{Resultaten}
+\begin{figure}[bt]
+    \centering
+    \includegraphics[width=0.45\textwidth]{metingen}
+    \caption{Meetwaarden met lineaire schaling.}\label{fig:metingen}
+\end{figure}
+
 \begin{figure*}[htb]
     \centering
     \includegraphics[width=0.9\textwidth]{main_1_2}
@@ -184,11 +190,6 @@ docker run
 \end{figure*}
 Om het systeem te evalueren, wordt het aantal operatoren dat getallen factoriseert geschaald. 
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.45\textwidth]{metingen}
-    \caption{Meetwaarden met perfect, lineaire schaling.}\label{fig:metingen}
-\end{figure}
 
 \section{Besluit}
 \onecolumn
