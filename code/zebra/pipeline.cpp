@@ -126,6 +126,37 @@ cl_context CreateContext()
     return context;
 }
 
+double createFilter(double *gKernel, int size)
+{
+   //generate pascals triangle
+   double *row = new double[size];
+
+   size--;
+
+   row[0] = 1.0; //First element is always 1
+   double sum = 1.0;
+   for(int i=1; i<size/2+1; i++){ //Progress up, until reaching the middle value
+       row[i] = row[i-1] * (size-i+1)/i;
+       sum += row[i];
+   }
+   for(int i=size/2+1; i<=size; i++){ //Copy the inverse of the first part
+       row[i] = row[size-i];
+       sum += row[i];
+   }
+
+   size++;
+
+   // generate kernel
+   for (int x = 0; x < size; ++x)
+       for (int y = 0; y < size; ++y)
+           gKernel[x + y * size] = row[x] * row[y];
+
+   delete [ ] row;
+   row = NULL;
+
+   return sum;
+}
+
 int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device)
 {
     cl_uint platform_id_count = 0;
@@ -192,35 +223,19 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     const int size = w*h;
 
-    //const int KERNEL_OFFSET = 5;
-    /*
-    const int blur[25]= {
-        1, 4, 6, 4, 1,
-        4, 16, 24, 16, 4,
-        6, 24, 36, 24, 6,
-        4, 16, 24, 16, 4,
-        1, 4, 6, 4, 1
-    };*/
-    const int KERNEL_OFFSET = 13;
-    const int blur[KERNEL_OFFSET * KERNEL_OFFSET] = {
-        1, 12, 66, 220, 495, 792, 924, 792, 495, 220, 66, 12, 1, 
-12, 144, 792, 2640, 5940, 9504, 11088, 9504, 5940, 2640, 792, 144, 12, 
-66, 792, 4356, 14520, 32670, 52272, 60984, 52272, 32670, 14520, 4356, 792, 66, 
-220, 2640, 14520, 48400, 108900, 174240, 203280, 174240, 108900, 48400, 14520, 2640, 220, 
-495, 5940, 32670, 108900, 245025, 392040, 457380, 392040, 245025, 108900, 32670, 5940, 495, 
-792, 9504, 52272, 174240, 392040, 627264, 731808, 627264, 392040, 174240, 52272, 9504, 792, 
-924, 11088, 60984, 203280, 457380, 731808, 853776, 731808, 457380, 203280, 60984, 11088, 924, 
-792, 9504, 52272, 174240, 392040, 627264, 731808, 627264, 392040, 174240, 52272, 9504, 792, 
-495, 5940, 32670, 108900, 245025, 392040, 457380, 392040, 245025, 108900, 32670, 5940, 495, 
-220, 2640, 14520, 48400, 108900, 174240, 203280, 174240, 108900, 48400, 14520, 2640, 220, 
-66, 792, 4356, 14520, 32670, 52272, 60984, 52272, 32670, 14520, 4356, 792, 66, 
-12, 144, 792, 2640, 5940, 9504, 11088, 9504, 5940, 2640, 792, 144, 12,  
-1, 12, 66, 220, 495, 792, 924, 792, 495, 220, 66, 12, 1
-    };
+    const int KERNEL_OFFSET = 5;
+    double *mask = new double[KERNEL_OFFSET * KERNEL_OFFSET];
+    double sf = createFilter( mask, KERNEL_OFFSET );
+    sf *= sf;
 
+    for( int i = 0; i < KERNEL_OFFSET * KERNEL_OFFSET; i++ )
+    {
+        std::cout << mask[i] << ",";
+    }
+    std::cout << std::endl;
+    std::cout << sf << std::endl;
 
-
-    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * KERNEL_OFFSET * KERNEL_OFFSET, (void *)&blur, NULL );
+    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * KERNEL_OFFSET * KERNEL_OFFSET, (void *)mask, NULL );
 
     err |= clSetKernelArg( blur_kernel, 0, sizeof(cl_mem), &gray_cl );
     err |= clSetKernelArg( blur_kernel, 1, sizeof(cl_mem), &img_cl );
@@ -228,6 +243,8 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     err |= clSetKernelArg( blur_kernel, 3, sizeof(int), (const void *)&w );
     err |= clSetKernelArg( blur_kernel, 4, sizeof(cl_mem), &mask_cl );
     err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&KERNEL_OFFSET );
+    err |= clSetKernelArg( blur_kernel, 6, sizeof(double), (const void *)&sf );
+
 
     if( err != CL_SUCCESS )
     {
