@@ -311,6 +311,10 @@ int MainWindow::printDevices() {
                 this->toggleDevice(i, j, newAct->isChecked());
             });
 
+            std::string shortcut("Ctrl+" + std::to_string(i+j));
+            printf("%d. SHORTCUT: %s\n", j+1, shortcut.c_str());
+            newAct->setShortcut(QApplication::translate("MainWindow", shortcut.c_str() , nullptr));
+
             ui->menuWindow->addAction(newAct);
 
 
