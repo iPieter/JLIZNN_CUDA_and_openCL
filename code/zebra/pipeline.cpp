@@ -81,7 +81,7 @@ cl_command_queue create_command_queue( cl_context context, cl_device_id device )
     free(value);
 
     cl_int err;
-    cl_command_queue result = clCreateCommandQueue( context, device, 0, &err );
+    cl_command_queue result = clCreateCommandQueue( context, device, CL_QUEUE_PROFILING_ENABLE, &err );
 
     if( err != CL_SUCCESS )
     {
@@ -159,6 +159,7 @@ double createFilter(double *gKernel, int size)
 
 int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device, int kernel_size)
 {
+   
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
     std::vector<cl_platform_id> platform_ids(platform_id_count);
@@ -250,16 +251,21 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     size_t globalWorkSize[] = { (size_t)(h/8)*8, (size_t)(w/8)*8 };
     //size_t localWorkSize[] = {8, 8};
 
+    //timing
+    cl_event event;
+
     //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL );
-
+    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
+   
     if( err != CL_SUCCESS )
     {
         std::cout << "Couldn't enqueue buffer:" << err << std::endl;
     }
 
     std::cout << "Waiting for queue to finish" << std::endl;
+
+    clWaitForEvents(1, &event);
 
     err = clFinish( command_queue );
 
@@ -288,6 +294,18 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     clReleaseProgram( program );
 
     //free( img );
+    cl_ulong time_submit;
+    cl_ulong time_start;
+    cl_ulong time_end;
+
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(time_submit), &time_submit, NULL);
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+    double ns = time_end-time_start;
+    double overhead = time_start-time_submit;
+    printf("OpenCl Execution time is: %0.6f milliseconds, width %0.6f overhead \n",ns / 1000000.0, overhead / 1000000.0);
+
 
     return 0;
 }
