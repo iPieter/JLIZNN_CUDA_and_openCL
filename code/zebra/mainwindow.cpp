@@ -143,7 +143,7 @@ void MainWindow::on_pushButton_3_pressed()
     }
     */
     for ( auto device : enabled_devices )
-        run( img_original, img, w, h, comp, device[0], device[1] );
+        run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
 
     delete scene;
 

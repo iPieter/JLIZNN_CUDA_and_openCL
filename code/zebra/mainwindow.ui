@@ -73,7 +73,7 @@ background: #2b2e37;
        <number>1</number>
       </property>
       <property name="maximum">
-       <number>13</number>
+       <number>51</number>
       </property>
       <property name="singleStep">
        <number>2</number>

@@ -157,7 +157,7 @@ double createFilter(double *gKernel, int size)
    return sum;
 }
 
-int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device)
+int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device, int kernel_size)
 {
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
@@ -223,19 +223,18 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     const int size = w*h;
 
-    const int KERNEL_OFFSET = 5;
-    double *mask = new double[KERNEL_OFFSET * KERNEL_OFFSET];
-    double sf = createFilter( mask, KERNEL_OFFSET );
+    double *mask = new double[kernel_size * kernel_size];
+    double sf = createFilter( mask, kernel_size );
     sf *= sf;
 
-    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * KERNEL_OFFSET * KERNEL_OFFSET, (void *)mask, NULL );
+    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * kernel_size * kernel_size, (void *)mask, NULL );
 
     err |= clSetKernelArg( blur_kernel, 0, sizeof(cl_mem), &gray_cl );
     err |= clSetKernelArg( blur_kernel, 1, sizeof(cl_mem), &img_cl );
     err |= clSetKernelArg( blur_kernel, 2, sizeof(int), (const void *)&size );
     err |= clSetKernelArg( blur_kernel, 3, sizeof(int), (const void *)&w );
     err |= clSetKernelArg( blur_kernel, 4, sizeof(cl_mem), &mask_cl );
-    err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&KERNEL_OFFSET );
+    err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&kernel_size );
     err |= clSetKernelArg( blur_kernel, 6, sizeof(double), (const void *)&sf );
     err |= clSetKernelArg( blur_kernel, 7, sizeof(double), (const void *)&comp );
 
