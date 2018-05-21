@@ -34,11 +34,17 @@ unix {
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        pipeline.cpp
 
 HEADERS += \
         mainwindow.h \
-    std_image.h
+        std_image.h \
+        std_image_write.h
 
 FORMS += \
         mainwindow.ui
+
+RESOURCES += \
+    pipeline.qrc
+

@@ -1,7 +1,4 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
@@ -12,21 +9,25 @@
 #include <vector>
 #include <fstream>
 #include <string.h>
+#include <Qfile>
+#include <QLatin1Literal>
 
-#include "std_image.h"
-#include "std_image_write.h"
-
-cl_program load_program( std::string file_name, cl_context context, cl_device_id device )
+cl_program load_program( QString file_name, cl_context context, cl_device_id device )
 {
     cl_int err;
 
-    std::ifstream file_handle( file_name );
+    QFile qfile( file_name );
+    if (!qfile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        std::cout << "Invalid file" << std::endl;
+        exit(-1);
+    }
+
+    QTextStream in(&qfile);
 
     std::string file;
-    std::string line;
-    while( std::getline( file_handle, line) )
-    {
-        file += line;
+    while (!in.atEnd()) {
+        file += in.readLine().toUtf8().constData();
         file += "\n";
     }
 
@@ -125,7 +126,7 @@ cl_context CreateContext()
     return context;
 }
 
-int main() 
+int run(unsigned char* img_original, int w, int h, int comp)
 {
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
@@ -140,13 +141,8 @@ int main()
 
     cl_context context = CreateContext();
 
-    cl_program program = load_program( "test.cl", context, device_ids[2] );
+    cl_program program = load_program(":/test.cl", context, device_ids[2] );
     cl_command_queue command_queue = create_command_queue( context, device_ids[2] );
-
-    int w;
-    int h;
-    int comp;
-    unsigned char* img_original = stbi_load( "test2.jpg", &w, &h, &comp, STBI_rgb );
 
     if( !img_original )
     {
@@ -272,7 +268,7 @@ int main()
 
     std::cout << "Writing image" << std::endl;
 
-    printf( "%d \n", stbi_write_png("output.png", w, h, comp, (void *)img, 0 ) );
+    //printf( "%d \n", stbi_write_png("output.png", w, h, comp, (void *)img, 0 ) );
 
     clReleaseContext( context );
     clReleaseCommandQueue( command_queue );

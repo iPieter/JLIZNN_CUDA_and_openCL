@@ -1,9 +1,3 @@
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <QGraphicsScene>
@@ -15,12 +9,18 @@
 #include <algorithm>    // std::max
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #define TEST_INDEX(i,size) ((i >= 0 && i < size) ? true : false)
 
+#ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "std_image.h"
+#endif
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+
+#include "pipeline.cpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -63,6 +63,8 @@ void MainWindow::on_pushButton_pressed()
     scene->setSceneRect(image.rect());
 
     QTimer::singleShot(200, this, SLOT(resize()));
+
+    run(img, w, h, comp);
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
@@ -117,11 +119,13 @@ void MainWindow::on_pushButton_3_pressed()
 
     for (int x = 0; x < kernel_size; ++x)
     {
+        QTextStream(stdout) << "{";
+
         for (int y = 0; y < kernel_size; ++y)
         {
-            QTextStream(stdout) << gKernel[x][y] << " ";
+            QTextStream(stdout) << gKernel[x][y] << ", ";
         }
-        QTextStream(stdout) << "\n";
+        QTextStream(stdout) << "}\n";
 
     }
 
@@ -173,7 +177,6 @@ void MainWindow::on_pushButton_3_pressed()
         delete [ ] gKernel[i];
     delete [ ] gKernel;
     gKernel = NULL;
-
 }
 
 
@@ -298,8 +301,6 @@ int MainWindow::printDevices() {
     platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
     clGetPlatformIDs(platformCount, platforms, NULL);
 
-    enabled_devices = new int *[platformCount];
-
     for (i = 0; i < platformCount; i++) {
 
         // get all devices
@@ -307,12 +308,8 @@ int MainWindow::printDevices() {
         devices = (cl_device_id*) malloc(sizeof(cl_device_id) * deviceCount);
         clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);
 
-        enabled_devices[i] = new int[deviceCount];
-
         // for each device print critical attributes
         for (j = 0; j < deviceCount; j++) {
-
-            enabled_devices[i][j] = 0;
 
             // print device name
             clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &valueSize);
@@ -347,18 +344,24 @@ int MainWindow::printDevices() {
 
 void MainWindow::toggleDevice(int platform, int device, bool toggle)
 {
-    enabled_devices[platform][device] = toggle;
-
-    int platforms =  sizeof enabled_devices / sizeof enabled_devices[0];
-
-    for( int i = 0; i < platforms; i++ )
+    if ( toggle )
     {
-        int devices = sizeof enabled_devices[i] / sizeof(int);
-
-        for( int j = 0; j <= devices; j++ )
-        {
-            QTextStream(stdout) << "Device: " << i << ", " << j << ": " << enabled_devices[i][j] << '\n';
-        }
+        enabled_devices.push_back(new int[2]{ platform, device });
+    }
+    else
+    {
+        enabled_devices.erase(
+           std::remove_if(
+              enabled_devices.begin(),
+              enabled_devices.end(),
+              [platform, device]( const int* v ){ return v[0] == platform && v[1] == device; }
+          ),
+          enabled_devices.end()
+        );
     }
 
+    for( int* n : enabled_devices )
+    {
+       QTextStream(stdout) << "Device: " << n[0] << ", " << n[1] << '\n';
+    }
 }

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <vector>
 
 namespace Ui {
 class MainWindow;
@@ -25,6 +26,9 @@ private:
     int createFilter(int **gKernel, int size);
     int printDevices();
     void toggleDevice(int platform, int device, bool toggle);
+    void execute_pipeline();
+    void transfer_image();
+
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     QPixmap image;
@@ -35,7 +39,7 @@ private:
 
     int kernel_size = 5;
 
-    int **enabled_devices;
+    std::vector<int*> enabled_devices;
 
 private slots:
     void on_pushButton_pressed();
