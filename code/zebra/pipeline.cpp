@@ -223,7 +223,7 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     const int size = w*h;
 
-    const int KERNEL_OFFSET = 5;
+    const int KERNEL_OFFSET = 201;
     double *mask = new double[KERNEL_OFFSET * KERNEL_OFFSET];
     double sf = createFilter( mask, KERNEL_OFFSET );
     sf *= sf;
@@ -253,13 +253,13 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     std::cout << "Enqueuing kernel" << std::endl;
 
-    size_t globalWorkSize[] = { (size_t)h, (size_t)w };
-    //size_t globalWorkSize[] = { (size_t)(h/8 + 1)*8, (size_t)(w/8 + 1)*8 };
-    size_t localWorkSize[] = { 1, 1 };
+    //size_t globalWorkSize[] = { (size_t)h, (size_t)w };
+    size_t globalWorkSize[] = { (size_t)(h/8)*8, (size_t)(w/8)*8 };
+    //size_t localWorkSize[] = {8, 8};
 
     //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
+    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL );
 
     if( err != CL_SUCCESS )
     {

@@ -30,7 +30,7 @@ __kernel void kernel_test( global const unsigned char *img_original, global unsi
             int j = j_d - mask_size / 2;
             int index = ((pos.x + i) * width + pos.y + j);
 
-            //if( TEST_INDEX(index, array_size)) //who the fuck needs testing when you have the best bits
+            if( TEST_INDEX(index, array_size)) //who the fuck needs testing when you have the best bits
             {
                 sum_r_x += mask[i_d + j_d * mask_size] * img_original[3 * index];
                 sum_g_x += mask[i_d + j_d * mask_size] * img_original[3 * index + 1];
