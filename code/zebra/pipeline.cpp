@@ -223,17 +223,10 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     const int size = w*h;
 
-    const int KERNEL_OFFSET = 201;
+    const int KERNEL_OFFSET = 5;
     double *mask = new double[KERNEL_OFFSET * KERNEL_OFFSET];
     double sf = createFilter( mask, KERNEL_OFFSET );
     sf *= sf;
-
-    for( int i = 0; i < KERNEL_OFFSET * KERNEL_OFFSET; i++ )
-    {
-        std::cout << mask[i] << ",";
-    }
-    std::cout << std::endl;
-    std::cout << sf << std::endl;
 
     cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * KERNEL_OFFSET * KERNEL_OFFSET, (void *)mask, NULL );
 
@@ -244,6 +237,7 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     err |= clSetKernelArg( blur_kernel, 4, sizeof(cl_mem), &mask_cl );
     err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&KERNEL_OFFSET );
     err |= clSetKernelArg( blur_kernel, 6, sizeof(double), (const void *)&sf );
+    err |= clSetKernelArg( blur_kernel, 7, sizeof(double), (const void *)&comp );
 
 
     if( err != CL_SUCCESS )

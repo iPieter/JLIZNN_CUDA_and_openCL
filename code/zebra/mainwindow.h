@@ -20,6 +20,7 @@ public:
 public slots:
     void resizeEvent(QResizeEvent* event);
     void resize();
+    void on_open_triggered();
 
 private:
     void createFilter(double **gKernel, int size);
@@ -51,6 +52,7 @@ private slots:
     void on_horizontalSlider_4_valueChanged(int value);
     void on_horizontalSlider_3_valueChanged(int value);
     void on_horizontalSlider_2_valueChanged(int value);
+
 };
 
 

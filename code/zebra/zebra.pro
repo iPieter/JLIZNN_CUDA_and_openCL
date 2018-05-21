@@ -43,7 +43,7 @@ HEADERS += \
         std_image_write.h
 
 FORMS += \
-        mainwindow.ui
+    mainwindow.ui
 
 RESOURCES += \
     pipeline.qrc

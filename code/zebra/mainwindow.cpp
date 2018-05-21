@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QSignalMapper>
+#include <QFileDialog>
 
 #include <algorithm>    // std::max
 
@@ -28,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
+    //connect(ui->open, SIGNAL(QAction::toggled()), this, SLOT(MainWindow::on_open_triggered));
     //show openCL devices
     printDevices();
 }
@@ -42,27 +43,6 @@ void MainWindow::on_pushButton_pressed()
 {
     //ui->setupUi(this);
 
-    img = stbi_load( "/Users/pieterdelobelle/zebra.jpg", &w, &h, &comp, STBI_rgb );
-
-    cl_uint platform_id_count = 0;
-    clGetPlatformIDs( 0, nullptr, &platform_id_count );
-
-    if(img == NULL)
-    {
-        QTextStream(stdout) << "Couldn't load image\n";
-    }
-
-    QTextStream(stdout) << "Loaded img: " << w << ", " << h << ", " << comp << '\n';
-
-    QImage imageQ(img, w, h, QImage::Format_RGB888);
-    //image.load("/Users/Pieter/Desktop/Schermafbeelding 2018-02-10 om 13.14.20.png");
-    scene = new QGraphicsScene(this);
-    scene->addPixmap(QPixmap::fromImage(imageQ));
-    ui->mainImage->setScene(scene);
-
-    scene->setSceneRect(image.rect());
-
-    QTimer::singleShot(200, this, SLOT(resize()));
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
@@ -89,13 +69,13 @@ void MainWindow::on_pushButton_2_pressed()
     QTextStream(stdout) << "kernel\n";
 
     int i;
-    for( i = 0; i < w * h * comp; i += 3)
+    for( i = 0; i < w * h * comp; i += comp)
     {
         img[i + 1] = img[i];
         img[i + 2] = img[i];
     }
 
-    QImage imageQ(img, w, h, QImage::Format_RGB888);
+    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     //image.load("/Users/Pieter/Desktop/Schermafbeelding 2018-02-10 om 13.14.20.png");
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));
@@ -107,7 +87,7 @@ void MainWindow::on_pushButton_2_pressed()
 void MainWindow::on_pushButton_3_pressed()
 {
     unsigned char* img_original( new unsigned char[ w * h * comp]);
-    memcpy( img_original, img, w*h*3*sizeof(unsigned char) );
+    memcpy( img_original, img, w*h*comp*sizeof(unsigned char) );
 
     /*
     int **gKernel;
@@ -165,7 +145,9 @@ void MainWindow::on_pushButton_3_pressed()
     for ( auto device : enabled_devices )
         run( img_original, img, w, h, comp, device[0], device[1] );
 
-    QImage imageQ(img, w, h, QImage::Format_RGB888);
+    delete scene;
+
+    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));
     ui->mainImage->setScene(scene);
@@ -254,14 +236,14 @@ void MainWindow::on_pushButton_4_pressed()
     QTextStream(stdout) << "colour grading\n";
 
     int i;
-    for( i = 0; i < w * h * comp; i += 3)
+    for( i = 0; i < w * h * comp; i += comp)
     {
         img[i + 0] = std::min( 255, std::max( 0, (int) ( 255.0 * img[i + 0] / r ) ) );
         img[i + 1] = std::min( 255, std::max( 0, (int) (  255.0 * img[i + 1] / g ) ) );
         img[i + 2] = std::min( 255, std::max( 0, (int) (  255.0 * img[i + 2] / b ) ) );
     }
 
-    QImage imageQ(img, w, h, QImage::Format_RGB888);
+    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));
     ui->mainImage->setScene(scene);
@@ -366,4 +348,39 @@ void MainWindow::toggleDevice(int platform, int device, bool toggle)
     {
        QTextStream(stdout) << "Device: " << n[0] << ", " << n[1] << '\n';
     }
+}
+
+void MainWindow::on_open_triggered()
+{
+    if (img != NULL)
+    {
+        delete[] img;
+        delete scene;
+        //delete imageQ;
+    }
+
+    auto filename = QFileDialog::getOpenFileName(this,
+        tr("Open Image"), "~", tr("Image Files (*.png *.jpg *.bmp)"));
+
+    img = stbi_load( filename.toUtf8().constData(), &w, &h, &comp, STBI_default );
+
+    cl_uint platform_id_count = 0;
+    clGetPlatformIDs( 0, nullptr, &platform_id_count );
+
+    if(img == NULL)
+    {
+        QTextStream(stdout) << "Couldn't load image\n";
+    }
+
+    QTextStream(stdout) << "Loaded img: " << w << ", " << h << ", " << comp << '\n';
+
+    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
+    //image.load("/Users/Pieter/Desktop/Schermafbeelding 2018-02-10 om 13.14.20.png");
+    scene = new QGraphicsScene(this);
+    scene->addPixmap(QPixmap::fromImage(imageQ));
+    ui->mainImage->setScene(scene);
+
+    scene->setSceneRect(image.rect());
+
+    QTimer::singleShot(200, this, SLOT(resize()));
 }

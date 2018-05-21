@@ -14,7 +14,7 @@ __kernel void red( global const unsigned char *img_original, global unsigned cha
 
 #define TEST_INDEX(i,size) ((i >= 0 && i < size) ? true : false)
 __kernel void kernel_test( global const unsigned char *img_original, global unsigned char *img, int array_size, int width, 
-                           global const double *mask, int mask_size, double scaling_factor )
+                           global const double *mask, int mask_size, double scaling_factor, int comp )
 {
     const int2 pos = {get_global_id(0), get_global_id(1)};
 
@@ -32,13 +32,13 @@ __kernel void kernel_test( global const unsigned char *img_original, global unsi
 
             if( TEST_INDEX(index, array_size)) //who the fuck needs testing when you have the best bits
             {
-                sum_r_x += mask[i_d + j_d * mask_size] * img_original[3 * index];
-                sum_g_x += mask[i_d + j_d * mask_size] * img_original[3 * index + 1];
-                sum_b_x += mask[i_d + j_d * mask_size] * img_original[3 * index + 2];
+                sum_r_x += mask[i_d + j_d * mask_size] * img_original[ comp * index];
+                sum_g_x += mask[i_d + j_d * mask_size] * img_original[ comp * index + 1];
+                sum_b_x += mask[i_d + j_d * mask_size] * img_original[ comp * index + 2];
             }
         }
     }
-    img[ 3 * (pos.x * width + pos.y) + 0 ] = (unsigned char)(sum_r_x / scaling_factor);
-    img[ 3 * (pos.x * width + pos.y) + 1 ] = (unsigned char)(sum_g_x / scaling_factor);
-    img[ 3 * (pos.x * width + pos.y) + 2 ] = (unsigned char)(sum_b_x / scaling_factor);
+    img[ comp * (pos.x * width + pos.y) + 0 ] = (unsigned char)(sum_r_x / scaling_factor);
+    img[ comp * (pos.x * width + pos.y) + 1 ] = (unsigned char)(sum_g_x / scaling_factor);
+    img[ comp * (pos.x * width + pos.y) + 2 ] = (unsigned char)(sum_b_x / scaling_factor);
 }
