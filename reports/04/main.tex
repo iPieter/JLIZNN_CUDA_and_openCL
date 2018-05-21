@@ -1,0 +1,94 @@
+% PP-Article.tex for AEA last revised 22 June 2011
+\documentclass[twocolumn, a4paper]{article}
+
+%%%%%% NOTE FROM OVERLEAF: The mathtime package is no longer publicly available nor distributed. We recommend using a different font package e.g. mathptmx if you'd like to use a Times font.
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage[dutch]{babel}
+\usepackage{subcaption}
+\usepackage[width=.8\textwidth]{caption}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{longtable}
+\usepackage{minted}
+% If you have trouble with the mathtime package please see our technical support 
+% document at: http://www.aeaweb.org/templates/technical_support.pdf
+% You may remove the mathtime package if you can't get it working but your page
+% count may be inaccurate as a result.
+% \usepackage[cmbold]{mathtime}
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands 
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+% 
+\usepackage{pdfpages}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\setlength{\marginparwidth}{2cm}
+% Note: you may use either harvard or natbib (but not both) to provide a wider
+% variety of citation commands than latex supports natively. See below.
+
+% Uncomment the next line to use the natbib package with bibtex 
+%\usepackage{natbib}
+\usepackage{titlesec}
+
+\titlespacing*\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing*\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing*\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+
+
+
+% Uncomment the next line to use the harvard package with bibtex
+%\usepackage[abbr]{harvard}
+
+% This command determines the leading (vertical space between lines) in draft mode
+% with 1.5 corresponding to "double" spacing.
+\begin{document}
+
+\title{Geavanceerde computerarchitectuur: Labo 02' \\ 
+\large{Uitbreiding: OpenCL}}
+\author{\textsc{Anton Danneels en Pieter Delobelle}}
+\date{}
+\maketitle
+
+\section{Inleiding}
+
+
+\section{Analyse}
+
+\subsection{GPU}
+Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps kunnen typisch 32 threads in parallel runnen, waardoor de blocksize idealiter een veelvoud van 32 is.
+
+\subsection{OpenCL}
+OpenCL is---net als CUDA---een framework en platform om berekeningen te kunnen uitvoeren op GPU's, maar biedt ook meer flexibiliteit door ook CPU's en andere \emph{hardware accelerators} te ondersteunen. Daarnaast is OpenCL ook een open standaard die door verschillende fabrikanten wordt gevolgd, in tegenstelling tot CUDA van NVIDEA.
+
+\todo[inline]{global, work size, local, idk}
+
+\begin{minted}{c}
+  int i = blockIdx.x * blockDim.x 
+    + threadIdx.x;
+\end{minted}
+\label{c:index}
+
+
+\section{Oplossing}
+
+\subsection{Vergelijking}
+
+\paragraph{blocksize}
+
+\section{Besluit}
+
+
+\onecolumn
+
+\appendix
+
+
+\include{data}
+
+\newpage
+
+% The appendix command is issued once, prior to all appendices, if any.
+%\appendix
+\end{document}
+
