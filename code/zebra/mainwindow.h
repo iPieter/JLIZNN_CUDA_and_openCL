@@ -45,9 +45,9 @@ private:
 
     std::vector<int*> enabled_devices;
 
-   QString temp_file;
+    QString temp_file;
 
-    //QPoint dragStartPosition;
+    QPoint dragStartPosition;
 
 private slots:
     void on_pushButton_pressed();
@@ -60,7 +60,8 @@ private slots:
     void on_horizontalSlider_3_valueChanged(int value);
     void on_horizontalSlider_2_valueChanged(int value);
     void mousePressEvent(QMouseEvent *event);
-    //void mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+
 };
 
 

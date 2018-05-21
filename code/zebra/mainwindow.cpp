@@ -36,6 +36,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->open, SIGNAL(QAction::toggled()), this, SLOT(MainWindow::on_open_triggered));
     //show openCL devices
     printDevices();
+
+    //centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
+    //setMouseTracking(true);
+
 }
 
 MainWindow::~MainWindow()
@@ -156,6 +160,8 @@ void MainWindow::on_pushButton_3_pressed()
         run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
 
     delete scene;
+
+    temp_file == NULL;
 
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     scene = new QGraphicsScene(this);
@@ -403,7 +409,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
- /*       dragStartPosition = event->pos();
+        dragStartPosition = event->pos();
         QTextStream(stdout) << dragStartPosition.x() <<"\n";
 
     }
@@ -413,23 +419,26 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     if (!(event->buttons() & Qt::LeftButton))
         return;
-    if ((event->pos() - dragStartPosition).manhattanLength()< 10)
+    if ((event->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance())
         return;
-*/
-    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
-
-    if ( temp_file == NULL )
+    if (event->pos().x() > ui->mainImage->geometry().topLeft().x() &&
+        event->pos().x() < ui->mainImage->geometry().bottomRight().x() &&
+        event->pos().y() > ui->mainImage->geometry().topLeft().y() &&
+        event->pos().y() < ui->mainImage->geometry().bottomRight().y())
     {
-        QTemporaryFile file;
-        file.setFileTemplate("XXXXXX.png");
-        file.setAutoRemove(false);
-        file.open();
-        temp_file = file.fileName();
-    }
+        if ( temp_file == NULL )
+        {
+            QTemporaryFile file;
+            file.setFileTemplate("XXXXXX.png");
+            file.setAutoRemove(false);
+            file.open();
+            temp_file = file.fileName();
+            stbi_write_png(temp_file.toUtf8().constData(), w, h, comp, (void *)img, 0 );
+        }
 
+        QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
 
         QUrl url = QUrl::fromLocalFile(temp_file);
-        stbi_write_png(temp_file.toUtf8().constData(), w, h, comp, (void *)img, 0 );
 
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
