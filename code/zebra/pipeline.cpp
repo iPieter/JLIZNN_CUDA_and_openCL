@@ -126,7 +126,7 @@ cl_context CreateContext()
     return context;
 }
 
-int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp)
+int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device)
 {
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
@@ -141,8 +141,8 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     cl_context context = CreateContext();
 
-    cl_program program = load_program(":/test.cl", context, device_ids[2] );
-    cl_command_queue command_queue = create_command_queue( context, device_ids[2] );
+    cl_program program = load_program(":/test.cl", context, device_ids[platform] );
+    cl_command_queue command_queue = create_command_queue( context, device_ids[device] );
 
     if( !img_original )
     {

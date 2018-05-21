@@ -162,7 +162,8 @@ void MainWindow::on_pushButton_3_pressed()
         }
     }
     */
-    run(img_original, img, w, h, comp);
+    for ( auto device : enabled_devices )
+        run( img_original, img, w, h, comp, device[0], device[1] );
 
     QImage imageQ(img, w, h, QImage::Format_RGB888);
     scene = new QGraphicsScene(this);
