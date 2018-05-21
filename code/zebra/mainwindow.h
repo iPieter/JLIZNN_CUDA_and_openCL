@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <QMouseEvent>
 #include <vector>
+#include <QPoint>
 
 namespace Ui {
 class MainWindow;
@@ -42,6 +44,8 @@ private:
 
     std::vector<int*> enabled_devices;
 
+    //QPoint dragStartPosition;
+
 private slots:
     void on_pushButton_pressed();
     void on_horizontalSlider_sliderMoved(int position);
@@ -52,7 +56,8 @@ private slots:
     void on_horizontalSlider_4_valueChanged(int value);
     void on_horizontalSlider_3_valueChanged(int value);
     void on_horizontalSlider_2_valueChanged(int value);
-
+    void mousePressEvent(QMouseEvent *event);
+    //void mouseMoveEvent(QMouseEvent *event);
 };
 
 

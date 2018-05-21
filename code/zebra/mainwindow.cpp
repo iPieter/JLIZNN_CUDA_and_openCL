@@ -6,6 +6,9 @@
 #include <QPixmap>
 #include <QSignalMapper>
 #include <QFileDialog>
+#include <QDrag>
+#include <QMimeData>
+#include <QTemporaryFile>
 
 #include <algorithm>    // std::max
 
@@ -16,6 +19,7 @@
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "std_image.h"
+#include "std_image_write.h"
 #endif
 
 #include "MainWindow.h"
@@ -387,4 +391,44 @@ void MainWindow::on_open_triggered()
     scene->setSceneRect(image.rect());
 
     QTimer::singleShot(200, this, SLOT(resize()));
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+ /*       dragStartPosition = event->pos();
+        QTextStream(stdout) << dragStartPosition.x() <<"\n";
+
+    }
+
+}
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+    if ((event->pos() - dragStartPosition).manhattanLength()< 10)
+        return;
+*/
+    QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
+
+    QTemporaryFile file;
+    file.setFileTemplate("XXXXXX.png");
+    file.setAutoRemove(false);
+    if (file.open()) {
+        QUrl url = QUrl::fromLocalFile(file.fileName());
+        stbi_write_png(file.fileName().toUtf8().constData(), w, h, comp, (void *)img, 0 );
+        file.close();
+
+        QDrag* drag = new QDrag(this);
+        QMimeData* mimeData = new QMimeData;
+        mimeData->setUrls(QList<QUrl>() << url);
+        QTextStream(stdout) <<file.fileName() <<"\n";
+
+        mimeData->setImageData(imageQ);
+        drag->setMimeData(mimeData);
+
+        Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+    }
+}
 }
