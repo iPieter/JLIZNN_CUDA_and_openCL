@@ -63,8 +63,6 @@ void MainWindow::on_pushButton_pressed()
     scene->setSceneRect(image.rect());
 
     QTimer::singleShot(200, this, SLOT(resize()));
-
-    run(img, w, h, comp);
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
@@ -111,6 +109,7 @@ void MainWindow::on_pushButton_3_pressed()
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*3*sizeof(unsigned char) );
 
+    /*
     int **gKernel;
     gKernel = new int *[kernel_size];
     for(int i = 0; i <kernel_size; i++)
@@ -162,6 +161,8 @@ void MainWindow::on_pushButton_3_pressed()
             }
         }
     }
+    */
+    run(img_original, img, w, h, comp);
 
     QImage imageQ(img, w, h, QImage::Format_RGB888);
     scene = new QGraphicsScene(this);
@@ -173,10 +174,10 @@ void MainWindow::on_pushButton_3_pressed()
     delete [ ] img_original;
     img_original = NULL;
 
-    for(int i = 0; i < kernel_size; i++)
-        delete [ ] gKernel[i];
-    delete [ ] gKernel;
-    gKernel = NULL;
+    //for(int i = 0; i < kernel_size; i++)
+        //delete [ ] gKernel[i];
+    //delete [ ] gKernel;
+    //gKernel = NULL;
 }
 
 

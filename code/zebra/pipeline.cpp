@@ -126,7 +126,7 @@ cl_context CreateContext()
     return context;
 }
 
-int run(unsigned char* img_original, int w, int h, int comp)
+int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp)
 {
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
@@ -171,8 +171,8 @@ int run(unsigned char* img_original, int w, int h, int comp)
         std::cout << "Couldn't create blur kernel" << err << std::endl;
     }
 
-    float *img = (float *)malloc( w * h * comp * sizeof(unsigned char));
-    memcpy( img, img_original, w * h * comp );
+    //float *img = (float *)malloc( w * h * comp * sizeof(unsigned char));
+    //memcpy( img, img_original, w * h * comp );
 
     std::cout << "Creating buffers" << std::endl;
 
@@ -180,7 +180,7 @@ int run(unsigned char* img_original, int w, int h, int comp)
 
     err = 0;
     cl_mem gray_cl = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, img_original, NULL );
-    cl_mem img_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, img, NULL );
+    cl_mem img_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, result, NULL );
     
     std::cout << "Setting buffer args" << std::endl;
 
@@ -236,8 +236,9 @@ int run(unsigned char* img_original, int w, int h, int comp)
 
     std::cout << "Enqueuing kernel" << std::endl;
 
-    size_t globalWorkSize[] = { (size_t)(h/8 + 1)*8, (size_t)(w/8 + 1)*8 };
-    size_t localWorkSize[] = { 8, 8 };
+    size_t globalWorkSize[] = { (size_t)h, (size_t)w };
+    //size_t globalWorkSize[] = { (size_t)(h/8 + 1)*8, (size_t)(w/8 + 1)*8 };
+    size_t localWorkSize[] = { 1, 1 };
 
     //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
@@ -259,7 +260,7 @@ int run(unsigned char* img_original, int w, int h, int comp)
 
     std::cout << "Reading buffer" << std::endl;
     
-    err = clEnqueueReadBuffer( command_queue, img_cl, CL_TRUE, 0, w * h * comp * sizeof(unsigned char), img, 0, NULL, NULL );
+    err = clEnqueueReadBuffer( command_queue, img_cl, CL_TRUE, 0, w * h * comp * sizeof(unsigned char), result, 0, NULL, NULL );
 
     if( err != CL_SUCCESS )
     {
@@ -276,7 +277,7 @@ int run(unsigned char* img_original, int w, int h, int comp)
     clReleaseKernel( gray_kernel );
     clReleaseProgram( program );
 
-    free( img );
+    //free( img );
 
     return 0;
 }
