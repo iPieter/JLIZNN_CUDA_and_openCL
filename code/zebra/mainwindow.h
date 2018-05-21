@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <vector>
 #include <QPoint>
+#include <QString>
 
 namespace Ui {
 class MainWindow;
@@ -43,6 +44,8 @@ private:
     int kernel_size = 5;
 
     std::vector<int*> enabled_devices;
+
+   QString temp_file;
 
     //QPoint dragStartPosition;
 

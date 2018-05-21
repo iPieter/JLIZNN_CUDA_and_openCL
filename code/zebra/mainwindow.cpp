@@ -40,6 +40,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    if (temp_file != NULL )
+    {
+        QFile file (temp_file);
+        file.remove();
+    }
+
     delete ui;
 }
 
@@ -412,23 +418,27 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 */
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
 
-    QTemporaryFile file;
-    file.setFileTemplate("XXXXXX.png");
-    file.setAutoRemove(false);
-    if (file.open()) {
-        QUrl url = QUrl::fromLocalFile(file.fileName());
-        stbi_write_png(file.fileName().toUtf8().constData(), w, h, comp, (void *)img, 0 );
-        file.close();
+    if ( temp_file == NULL )
+    {
+        QTemporaryFile file;
+        file.setFileTemplate("XXXXXX.png");
+        file.setAutoRemove(false);
+        file.open();
+        temp_file = file.fileName();
+    }
+
+
+        QUrl url = QUrl::fromLocalFile(temp_file);
+        stbi_write_png(temp_file.toUtf8().constData(), w, h, comp, (void *)img, 0 );
 
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
         mimeData->setUrls(QList<QUrl>() << url);
-        QTextStream(stdout) <<file.fileName() <<"\n";
+        QTextStream(stdout) <<temp_file <<"\n";
 
         mimeData->setImageData(imageQ);
         drag->setMimeData(mimeData);
 
         Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
     }
-}
 }
