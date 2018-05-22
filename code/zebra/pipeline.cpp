@@ -247,41 +247,76 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     std::cout << "Enqueuing kernel" << std::endl;
 
-    //size_t globalWorkSize[] = { (size_t)h, (size_t)w };
-    size_t globalWorkSize[] = { (size_t)(h/8)*8, (size_t)(w/8)*8 };
-    //size_t localWorkSize[] = {8, 8};
+    std::ofstream outfile;
 
-    //timing
-    cl_event event;
+    outfile.open("measurements.csv", std::ios_base::app);
+    outfile << "platform;device;work_size;ms_exec;ms_overhead\n";
 
-    //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-    //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
-   
-    if( err != CL_SUCCESS )
+    for (int work_size_x = 1; work_size_x < 128; work_size_x++)
     {
-        std::cout << "Couldn't enqueue buffer:" << err << std::endl;
+        std::cout << work_size_x << std::endl;
+        for (int work_size_y = 1; work_size_y < 128; work_size_y++)
+        {
+            outfile << platform << ';' << device << ';' << work_size_x << ';' << work_size_y;
+
+            for (int i = 0; i < 5; i++)
+            {
+
+                //size_t globalWorkSize[] = { (size_t)h, (size_t)w };
+                size_t globalWorkSize[] = { (size_t)(h/work_size_x)*work_size_x, (size_t)(w/work_size_y)*work_size_y };
+                size_t localWorkSize[] = {(size_t)work_size_x, (size_t)work_size_y};
+
+                //timing
+                cl_event event;
+
+                //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
+                //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
+                err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
+
+                if( err != CL_SUCCESS )
+                {
+                    std::cout << "Couldn't enqueue buffer:" << err << std::endl;
+                }
+
+                //std::cout << "Waiting for queue to finish" << std::endl;
+
+                clWaitForEvents(1, &event);
+
+                err = clFinish( command_queue );
+
+                if( err != CL_SUCCESS )
+                {
+                    std::cout << "Couldn't finish command queue: " << err << std::endl;
+                }
+
+                //std::cout << "Reading buffer" << std::endl;
+
+                err = clEnqueueReadBuffer( command_queue, img_cl, CL_TRUE, 0, w * h * comp * sizeof(unsigned char), result, 0, NULL, NULL );
+
+                if( err != CL_SUCCESS )
+                {
+                    std::cout << "Couldn't read buffer: " << err << std::endl;
+                }
+
+                cl_ulong time_submit;
+                cl_ulong time_start;
+                cl_ulong time_end;
+
+                clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(time_submit), &time_submit, NULL);
+                clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+                clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+                double ns = time_end-time_start;
+                double overhead = time_start-time_submit;
+                //printf("OpenCl Execution time is: %0.6f milliseconds, width %0.6f overhead \n",ns / 1000000.0, overhead / 1000000.0);
+                outfile << ';' << ns << ';' << overhead;
+
+            }
+            outfile <<'\n';
+
+        }
     }
 
-    std::cout << "Waiting for queue to finish" << std::endl;
-
-    clWaitForEvents(1, &event);
-
-    err = clFinish( command_queue );
-
-    if( err != CL_SUCCESS )
-    {
-        std::cout << "Couldn't finish command queue: " << err << std::endl;     
-    }
-
-    std::cout << "Reading buffer" << std::endl;
-    
-    err = clEnqueueReadBuffer( command_queue, img_cl, CL_TRUE, 0, w * h * comp * sizeof(unsigned char), result, 0, NULL, NULL );
-
-    if( err != CL_SUCCESS )
-    {
-        std::cout << "Couldn't read buffer: " << err << std::endl;
-    }
 
     std::cout << "Writing image" << std::endl;
 
@@ -294,18 +329,6 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     clReleaseProgram( program );
 
     //free( img );
-    cl_ulong time_submit;
-    cl_ulong time_start;
-    cl_ulong time_end;
-
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(time_submit), &time_submit, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
-
-    double ns = time_end-time_start;
-    double overhead = time_start-time_submit;
-    printf("OpenCl Execution time is: %0.6f milliseconds, width %0.6f overhead \n",ns / 1000000.0, overhead / 1000000.0);
-
 
     return 0;
 }
