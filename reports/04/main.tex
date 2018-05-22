@@ -56,10 +56,14 @@
 \section{Analyse}
 
 \subsection{GPU}
-Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps kunnen typisch 32 threads in parallel runnen, waardoor de blocksize idealiter een veelvoud van 32 is.
+Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps kunnen typisch 32 threads in parallel runnen, waardoor de blocksize idealiter een veelvoud van 32 is.\todo{herschrijven in opencl termen}
 
 \subsection{OpenCL}
 OpenCL is---net als CUDA---een framework en platform om berekeningen te kunnen uitvoeren op GPU's, maar biedt ook meer flexibiliteit door ook CPU's en andere \emph{hardware accelerators} te ondersteunen. Daarnaast is OpenCL ook een open standaard die door verschillende fabrikanten wordt gevolgd, in tegenstelling tot CUDA van NVIDEA.
+
+Omdat OpenCL meerdere \emph{vendors} en systemen ondersteunt, is er een hiërarchische organisatie om verschillende apparaten aan te sturen. Ten eerste zijn gelijkaardige systemen gegroepeerd per \emph{platform}. OpenCL-kernels worden gecompileerd voor een bepaald platform. 
+
+Ten tweede worden platformen opgedeeld in \emph{devices}. Dit is iedere CPU, GPU of andere \emph{hardware accelerator} onder een bepaald platform. Logischerwijs heeft ieder apparaat enkele eigenschappen, zoals kloksnelheid en het aantal \emph{work units}, die een invloed hebben op de resulterende uitvoersnelheid voor een bepaald probleem.
 
 \todo[inline]{global, work size, local, idk}
 
@@ -69,12 +73,24 @@ OpenCL is---net als CUDA---een framework en platform om berekeningen te kunnen u
 \end{minted}
 \label{c:index}
 
+\subsection{Gaussiaans vervagen}
+
+\subsection{Witpuntsverschuiving}
+
+\subsection{Qt}
+Qt is een \emph{cross-platform} raamwerk voor gebruikersinterfaces te ontwikkelen, waarbij de achterliggende code in C++ geschreven kan worden. Het raamwerk volgt een object-geörienteerde strategie, door iedere GUI-element te modelleren als een object (QWidget) met hiërarchische overerving voor verschillende types van elementen, zoals knoppen (QButton).
+
+\subsection{Kleurenruimte en kleurendiepte}
 
 \section{Oplossing}
 
-\subsection{Vergelijking}
+\subsection{Pipeline}
 
-\paragraph{blocksize}
+\subsection{Apparaatselectie}
+
+\section{Analyse}
+
+\section{Aanvullend werk}
 
 \section{Besluit}
 
