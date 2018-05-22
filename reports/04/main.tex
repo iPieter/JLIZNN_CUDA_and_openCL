@@ -85,15 +85,26 @@ Qt is een \emph{cross-platform} raamwerk voor gebruikersinterfaces te ontwikkele
 \section{Oplossing}
 
 \subsection{Pipeline}
+Voor een foto verwerkt kan worden door een kernel moet eerst de OpenCL omgeving geconfigureerd worden. Dit bestaat uit de volgende stappen:
+
+\begin{enumerate}
+    \item Platforms en devices opvragen 
+    \item Context aanmaken
+    \item Programma compileren
+    \item Command queue aanmaken
+    \item Kernels configureren
+\end{enumerate}
+Pas indien dit gebeurd is, kan kernel op de command queue gezet worden zodat deze uitgevoerd kan worden. Om de resultaten uit te lezen wordt er gewacht op de command queue en vervolgens kan een leesopdracht gegeven worden aan de command queue. 
+
+Om grotere hoeveelheden data naar de kernels te uploaden, wordt gebruik gemaakt van buffer objecten. Deze specifieren hoe de data er uit ziet en hoe groot deze is. In deze applicatie worden buffers gebruikt om de afbeeldingen en een kopie van de afbeelding door te sturen naar de kernel, samen met een mask.
 
 \subsection{Apparaatselectie}
+Pieter zijn QT code :expanding-brain-4:
 
 \section{Analyse}
 
-\section{Aanvullend werk}
-
 \section{Besluit}
-
+Voor de extra opdracht 
 
 \onecolumn
 
