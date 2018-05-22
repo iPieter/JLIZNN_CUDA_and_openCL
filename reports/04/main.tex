@@ -8,6 +8,7 @@
 \usepackage{subcaption}
 \usepackage[width=.8\textwidth]{caption}
 \usepackage{float}
+\usepackage[utf8]{inputenc}
 \usepackage{booktabs}
 \usepackage{multicol}
 \usepackage{longtable}
@@ -75,12 +76,32 @@ Iedere OpenCL-kernel wordt uitgevoerd door één of meerdere \emph{work items}, 
 Omdat OpenCL echter ook op CPU's draait, is het kiezen van een optimale \emph{local work size} echter complexer. Hiervoor biedt OpenCL de optie om dit op NULL te laten, waardoor automatisch de beste grootte gekozen wordt.
 
 \subsection{Kleurenruimte en kleurendiepte}
-Verschillende operaties \todo{...}
+Verschillende operaties werken intern met een kleurendiepte die groter is dan de standaard diepte waarin een afbeelding wordt ingelezen (8 bits per component). Dit is problematisch voor operaties zoals vervagen, aangezien convoluties hier voor resultaten kunnen zorgen die groter zijn wat kan weergegeven worden in een getal van 8 bits (256). Een optie is hiervoor om grotere representaties te gebruiken, maar dit stelt het probleem enkel uit. Hierom is gekozen om intern te werken met een zwevendekommagetal (\emph{double}) Pas finaal worden alle waarden gecast naar een 8-bits getal.
+
+Een tweede kwestie is in welke kleurruimte operaties uitgevoerd worden. Standaard worden bestanden ingelezen in RGB of RGBA indien er een \emph{alpha}-kanaal aanwezig is, maar andere kleurruimtes kunnen voor bepaalde operaties voordeliger zijn.
+
+\begin{itemize}
+    \item \textbf{RGB}: populair systeem dat kleuren encodeerd in 3 componenten, rood, groen en blauw. In het geval van RGB24 zijn er 16 miljoen kleuren mogelijk, maar voor recente ontwikkelingen omtrent \emph{high dynamic range} (HDR) is dit niet altijd meer toereikend. De meeste afbeeldingen zijn hierin echter zonder problemen te encoderen. 
+
+    Bepaalde bewerkingen, zoals het aanpassen van saturatie, zijn echter zeer complex in RGB. 
+
+    Daarnaast is het ook mogelijk om de RBG-ruimte niet-lineair te encoderen. Hierdoor kunnen bijvoorbeeld meer discrete zwartwaarden onderscheiden worden. Hiervoor wordt een parameter $\gamma$ geïntroduceerd.
+    
+    \item \textbf{HSL}: dit systeem encodeert de tint (\emph{hue}), saturatie en helderheid (\emph{lightness}) van een pixel. Het spreekt voor zich dat het aanpassen van deze componenten hierin zeer eenvoudig is. De tint kan voorgesteld worden in een kleurenwiel, wat dit systeem ook geschikt maakt voor kleureninput van gebruikers. Kleuren kunnen echter wel afwijken door interpolaties, wat het minder geschikt maakt voor bepaalde applicaties.
+
+    \item \textbf{HSI}: Variant op HSL, maar met een intensiteit-parameter in plaats van de helderheid.  
+    \item \textbf{CMYK}: additief kleurensysteem voor drukwerk, voor digitale verwerking biedt dit geen voordelen. 
+    \item \textbf{CIE XYZ}: systeem gebaseerd op perceptie. Er is één helderheidscomponent (Y) en twee kleurencomponenten (X en Z). Dit systeem is zeer bruikbaar voor het mixen van kleuren.
+    \item \textbf{CIElab}: Een tweede systeem met twee kleurencomponenten en een helderheidscomponent. Hier worden kleuren geëncodeerd als \emph{Luminance} en een combinatie van rood-groen en blauw-geel. Het is minder bruikbaar voor kleurtransformaties, maar is uniform (in tegenstelling to gequantiseerde modellen zoals RGB).
+\end{itemize}
+
+Voor de meeste operaties is een RBG-ruimte dus prima te doen, waarbij eventueel kan overgeschakeld worden naar CIE XYZ als intermediaire voorstelling mocht het mixen van kleuren gewenst zijn. 
 
 \subsection{Gaussiaans vervagen}
 Om OpenCL uit te testen werd een \textit{mask} toegepast op een afbeelding. Dit mask combineert pixels rondom een gekozen doelpixel, waarbij elke pixel een bepaald gewicht krijgt. E\'en van deze masks is de Gaussiaanse. Hierbij krijgen de pixels een gewicht gebaseerd op hun afstand tot het doelwit. De gewichten volgen zo een Gaussiaanse functie.
 
 \subsection{Witpuntsverschuiving}
+Het verschuiven van een witpunt van een afbeelding \todo{..}
 
 \subsection{Qt}
 Qt is een \emph{cross-platform} raamwerk voor gebruikersinterfaces te ontwikkelen, waarbij de achterliggende code in C++ geschreven kan worden. Het raamwerk volgt een object-geörienteerde strategie, door iedere GUI-element te modelleren als een object (QWidget) met hiërarchische overerving voor verschillende types van elementen, zoals knoppen (QButton).
@@ -103,7 +124,7 @@ Pas indien dit gebeurd is, kan kernel op de command queue gezet worden zodat dez
 Om grotere hoeveelheden data naar de kernels te uploaden, wordt gebruik gemaakt van buffer objecten. Deze specificeren hoe de data er uit ziet en hoe groot deze is. In deze applicatie worden buffers gebruikt om de afbeeldingen en een kopie van de afbeelding door te sturen naar de kernel, samen met een mask.
 
 \subsection{Apparaatselectie}
-Pieter zijn QT code :expanding-brain-4:
+Pieter zijn QT code expanding-brain-4
 
 \section{Evaluatie}
 
@@ -126,10 +147,10 @@ Voor een GPU (Device: AMD Radeon Pro 555 Compute Engine) is een meting uitgevoer
     \label{table:measurements}
     \begin{tabular}{@{}llrrr@{}}
         \toprule
-        Abeelding & Formaat (w, h, comp) & Intel i7-7700HQ CPU {[}ms{]} & Intel HD 630 {[}ms{]} & AMD Radeon Pro 555 {[}ms{]} \\ \midrule
+        Abeelding & Formaat (w, h, comp) & Intel i7-7700HQ CPU {(}ms{)} & Intel HD 630 {(}ms{)} & AMD Radeon Pro 555 {(}ms{)} \\ \midrule
         bob.jpg   & 48 x 64 x 3              & 3.9157                       & 4.552                 & 2.2738                      \\
         zebra.jpg & 2048 x 1365 x 3      & 2265.7                       & 4083.6                & 1954.3                      \\
-        paris.jpg & 11661 x 3581 x 4        & 42172                        & /                     & 6257.5                      \\ \bottomrule
+        paris.jpg & 11661 x 3581 x 4 & 42172 & 6257.6 \\ \bottomrule
     \end{tabular}
 \end{table*}
 
@@ -144,6 +165,7 @@ Voor een GPU (Device: AMD Radeon Pro 555 Compute Engine) is een meting uitgevoer
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{data/groot.png}
     \end{subfigure}
+    \caption{Grafische voorstelling van de data uit Tabel~\ref{table:measurements}.}\label{fig:images}
 \end{figure}
 
 \section{Besluit}
