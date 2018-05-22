@@ -55,33 +55,36 @@
 
 \section{Analyse}
 
-\subsection{GPU}
-Een GPU bestaat uit vele CUDA-cores, bedoeld om een \emph{single instruction multiple thread} (SIMT) architectuur te ondersteunen. Deze cores zijn verdeeld over een aantal \emph{stream multiprocessors} (SM), welke ook weer opgedeeld zijn in een aantal \emph{wraps}. Deze wraps kunnen typisch 32 threads in parallel runnen, waardoor de blocksize idealiter een veelvoud van 32 is.\todo{herschrijven in opencl termen}
-
 \subsection{OpenCL}
 OpenCL is---net als CUDA---een framework en platform om berekeningen te kunnen uitvoeren op GPU's, maar biedt ook meer flexibiliteit door ook CPU's en andere \emph{hardware accelerators} te ondersteunen. Daarnaast is OpenCL ook een open standaard die door verschillende fabrikanten wordt gevolgd, in tegenstelling tot CUDA van NVIDEA.
 
 Omdat OpenCL meerdere \emph{vendors} en systemen ondersteunt, is er een hiërarchische organisatie om verschillende apparaten aan te sturen. Ten eerste zijn gelijkaardige systemen gegroepeerd per \emph{platform}. OpenCL-kernels worden gecompileerd voor een bepaald platform. 
 
-Ten tweede worden platformen opgedeeld in \emph{devices}. Dit is iedere CPU, GPU of andere \emph{hardware accelerator} onder een bepaald platform. Logischerwijs heeft ieder apparaat enkele eigenschappen, zoals kloksnelheid en het aantal \emph{work units}, die een invloed hebben op de resulterende uitvoersnelheid voor een bepaald probleem.
-
-\todo[inline]{global, work size, local, idk}
+Ten tweede worden platformen opgedeeld in \emph{devices}. Dit is iedere CPU, GPU of andere \emph{hardware accelerator} onder een bepaald platform. Logischerwijs heeft ieder apparaat enkele eigenschappen, zoals kloksnelheid en het aantal \emph{work units}, die een invloed hebben op de resulterende uitvoersnelheid voor een bepaalde kernel.
 
 \begin{minted}{c}
-  int i = blockIdx.x * blockDim.x 
-    + threadIdx.x;
-\end{minted}
-\label{c:index}
+    const int2 pos = {
+            get_global_id(0), 
+            get_global_id(1)
+        };
+    \end{minted}
+    \label{c:index}
+
+Iedere OpenCL-kernel wordt uitgevoerd door één of meerdere \emph{work items}, wat equivalent is aan een CUDA-thread. Alle items krijgen enkele indices toegewezen: een globale index, een index binnen de work unit (local id) en de index van de work unit. Deze items worden dus gegroepeerd in blokken, die conceptueel overeenkomen met de \emph{wraps} uit CUDA. 
+
+Omdat OpenCL echter ook op CPU's draait, is het kiezen van een optimale \emph{local work size} echter complexer. Hiervoor biedt OpenCL de optie om dit op NULL te laten, waardoor automatisch de beste grootte gekozen wordt.
+
+\subsection{Kleurenruimte en kleurendiepte}
+Verschillende operaties \todo{...}
 
 \subsection{Gaussiaans vervagen}
-Om OpenCL uit te testen werd een \textit{mask} toegepast op een afbeelding. Dit mask combineert pixels rondom een gekozen doelwit pixel, waarbij elke pixel een bepaald gewicht krijgt. E\'en van deze masks is de gaussiaanse. Hierbij krijgen de pixels een gewicht gebaseerd op hun afstand tot het doelwit. De gewichten volgen zo een gaussiaanse functie.
+Om OpenCL uit te testen werd een \textit{mask} toegepast op een afbeelding. Dit mask combineert pixels rondom een gekozen doelpixel, waarbij elke pixel een bepaald gewicht krijgt. E\'en van deze masks is de Gaussiaanse. Hierbij krijgen de pixels een gewicht gebaseerd op hun afstand tot het doelwit. De gewichten volgen zo een Gaussiaanse functie.
 
 \subsection{Witpuntsverschuiving}
 
 \subsection{Qt}
 Qt is een \emph{cross-platform} raamwerk voor gebruikersinterfaces te ontwikkelen, waarbij de achterliggende code in C++ geschreven kan worden. Het raamwerk volgt een object-geörienteerde strategie, door iedere GUI-element te modelleren als een object (QWidget) met hiërarchische overerving voor verschillende types van elementen, zoals knoppen (QButton).
 
-\subsection{Kleurenruimte en kleurendiepte}
 
 \section{Oplossing}
 
@@ -97,12 +100,51 @@ Voor een foto verwerkt kan worden door een kernel moet eerst de OpenCL omgeving 
 \end{enumerate}
 Pas indien dit gebeurd is, kan kernel op de command queue gezet worden zodat deze uitgevoerd kan worden. Om de resultaten uit te lezen wordt er gewacht op de command queue en vervolgens kan een leesopdracht gegeven worden aan de command queue. 
 
-Om grotere hoeveelheden data naar de kernels te uploaden, wordt gebruik gemaakt van buffer objecten. Deze specifieren hoe de data er uit ziet en hoe groot deze is. In deze applicatie worden buffers gebruikt om de afbeeldingen en een kopie van de afbeelding door te sturen naar de kernel, samen met een mask.
+Om grotere hoeveelheden data naar de kernels te uploaden, wordt gebruik gemaakt van buffer objecten. Deze specificeren hoe de data er uit ziet en hoe groot deze is. In deze applicatie worden buffers gebruikt om de afbeeldingen en een kopie van de afbeelding door te sturen naar de kernel, samen met een mask.
 
 \subsection{Apparaatselectie}
 Pieter zijn QT code :expanding-brain-4:
 
-\section{Analyse}
+\section{Evaluatie}
+
+\subsection{Invloed van local work size}
+Zoals eerder vermeld, hebben verschillende devices een verschillende hardwareconfiguratie. Hierdoor zijn bepaalde dimensies langzamer---aangezien de hardware niet ideaal gebruikt wordt---of zelfs niet mogelijk. Ieder device kan zijn eigen maxima rapporteren, wat voor een CPU veelal één is.
+
+Voor een GPU (Device: AMD Radeon Pro 555 Compute Engine) is een meting uitgevoerd over alle combinaties van 1x1 tot 128x128. Hiervoor is een afbeelding van 1024x1024 van een zebra gekozen, met vier kleurencomponenten (RGBA). Per dimensie zijn er 5 metingen uitgevoerd. Hier resultaat is grafisch te zien in Figuur~\ref{fig:output-all}. De data staat ook op Github.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.55\textwidth]{data/output_all}
+    \caption{Invloed van \emph{work size} op uitvoertijd (in ns).}\label{fig:output-all}
+\end{figure}
+
+\subsection{Vergelijking tussen devices}
+
+\begin{table*}[]
+    \centering
+    \caption{Vergelijking tussen die OpenCL-devices op eenzelfde systeem.}
+    \label{table:measurements}
+    \begin{tabular}{@{}llrrr@{}}
+        \toprule
+        Abeelding & Formaat (w, h, comp) & Intel i7-7700HQ CPU {[}ms{]} & Intel HD 630 {[}ms{]} & AMD Radeon Pro 555 {[}ms{]} \\ \midrule
+        bob.jpg   & 48 x 64 x 3              & 3.9157                       & 4.552                 & 2.2738                      \\
+        zebra.jpg & 2048 x 1365 x 3      & 2265.7                       & 4083.6                & 1954.3                      \\
+        paris.jpg & 11661 x 3581 x 4        & 42172                        & /                     & 6257.5                      \\ \bottomrule
+    \end{tabular}
+\end{table*}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{data/klein.png}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{data/normaal.png}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{data/groot.png}
+    \end{subfigure}
+\end{figure}
 
 \section{Besluit}
 Dit verslag werd geschreven als een extra opdracht voor het labo `Geavanceerde computerarchitectuur'. Een pipeline om afbeeldingen te bewerken met behulp van \textit{masks} werd opgezet en ge\"evalueerd.

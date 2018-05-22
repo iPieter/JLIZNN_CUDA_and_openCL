@@ -1,0 +1,12 @@
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;0;auto;auto;2.27621e+09;29773;2.21251e+09;57282;2.24042e+09;34563;2.30935e+09;99389;2.22685e+09;31475
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;0;auto;auto;2.24017e+09;24308;2.27647e+09;60240;2.3045e+09;61054;2.25588e+09;57852;2.27193e+09;33562
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;2;auto;auto;1.97688e+09;1000;1.94468e+09;1000;1.93172e+09;1000;1.94601e+09;1000;1.93144e+09;1000
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;0;auto;auto;2.28318e+09;24577;2.24912e+09;39287;2.22246e+09;51939;2.30419e+09;58414;2.26948e+09;47172
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;2;auto;auto;1.99544e+09;1000;1.94249e+09;1000;1.94883e+09;1000;1.94196e+09;1000;1.94259e+09;1000
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;1;auto;auto;4.0841e+09;2.06413e+06;4.08701e+09;235471;4.08495e+09;233313;4.07805e+09;266762;4.08368e+09;217045

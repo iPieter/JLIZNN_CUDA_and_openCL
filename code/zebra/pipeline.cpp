@@ -250,28 +250,24 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     std::ofstream outfile;
 
     outfile.open("measurements.csv", std::ios_base::app);
-    outfile << "platform;device;work_size;ms_exec;ms_overhead\n";
+    outfile << "platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5\n";
 
-    for (int work_size_x = 1; work_size_x < 128; work_size_x++)
-    {
-        std::cout << work_size_x << std::endl;
-        for (int work_size_y = 1; work_size_y < 128; work_size_y++)
-        {
-            outfile << platform << ';' << device << ';' << work_size_x << ';' << work_size_y;
+
+            outfile << platform << ';' << device << ';' << "auto" << ';' << "auto";
 
             for (int i = 0; i < 5; i++)
             {
 
                 //size_t globalWorkSize[] = { (size_t)h, (size_t)w };
-                size_t globalWorkSize[] = { (size_t)(h/work_size_x)*work_size_x, (size_t)(w/work_size_y)*work_size_y };
-                size_t localWorkSize[] = {(size_t)work_size_x, (size_t)work_size_y};
+                size_t globalWorkSize[] = { (size_t)(h/8)*8, (size_t)(w/8)*8 };
+                //size_t localWorkSize[] = {(size_t)work_size_x, (size_t)work_size_y};
 
                 //timing
                 cl_event event;
 
                 //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
                 //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-                err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
+                    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
 
                 if( err != CL_SUCCESS )
                 {
@@ -314,8 +310,6 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
             }
             outfile <<'\n';
 
-        }
-    }
 
 
     std::cout << "Writing image" << std::endl;
