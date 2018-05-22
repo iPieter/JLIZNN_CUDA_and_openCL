@@ -9,6 +9,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QTemporaryFile>
+#include <QGraphicsPixmapItem>
 
 #include <algorithm>    // std::max
 
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalLayout_2->setStretch(0,4);
     ui->horizontalLayout_2->setStretch(1,1);
     ui->controls->setAlignment( Qt::AlignTop );
+    ui->mainImage->setRenderHints( QPainter::Antialiasing | QPainter::HighQualityAntialiasing );
 
     //connect(ui->open, SIGNAL(QAction::toggled()), this, SLOT(MainWindow::on_open_triggered));
     //show openCL devices
@@ -95,67 +97,19 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::on_apply_pressed()
 {
+    //create copy
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*comp*sizeof(unsigned char) );
 
-    /*
-    int **gKernel;
-    gKernel = new int *[kernel_size];
-    for(int i = 0; i <kernel_size; i++)
-        gKernel[i] = new int[kernel_size];
-    int sum = createFilter(gKernel, kernel_size);
 
-    for (int x = 0; x < kernel_size; ++x)
-    {
-        QTextStream(stdout) << "{";
-
-        for (int y = 0; y < kernel_size; ++y)
-        {
-            QTextStream(stdout) << gKernel[x][y] << ", ";
-        }
-        QTextStream(stdout) << "}\n";
-
-    }
-
-    QTextStream(stdout) << "sum" << sum << "\n";
-
-
-    for( int x = 0; x < w; x++ )
-    {
-        for( int y = 0; y < h; y++ )
-        {
-            if( x + y * w < w*h * 3 )
-            {
-                int sum_r_x = 0;
-                int sum_g_x = 0;
-                int sum_b_x = 0;
-
-                for( int i = 0; i < kernel_size; i++ )
-                {
-                    for( int j = 0; j < kernel_size; j++ )
-                    {
-                        int index = (x + i - kernel_size / 2 + (y + j - kernel_size /2) * w) * 3;
-                        if( TEST_INDEX(index, w*h * 3))
-                        {
-                            sum_r_x += gKernel[i][j] * img_original[index];
-                            sum_g_x += gKernel[i][j] * img_original[index + 1];
-                            sum_b_x += gKernel[i][j] * img_original[index + 2];
-                        }
-                    }
-                }
-
-                img[ (x + y * w) * 3 + 0 ] = (unsigned char)(sum_r_x / sum / sum );
-                img[ (x + y * w) * 3 + 1 ] = (unsigned char)(sum_g_x / sum / sum );
-                img[ (x + y * w) * 3 + 2 ] = (unsigned char)(sum_b_x / sum / sum );
-            }
-        }
-    }
-    */
+    //duplicate events for each device
     for ( auto device : enabled_devices )
         run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
 
+    //fixed a memory lead #proud
     delete scene;
 
+    //set image to view
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));

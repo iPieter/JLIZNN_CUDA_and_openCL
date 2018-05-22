@@ -49,6 +49,9 @@ background: #2b2e37;
 border: 0;
 margin: 0;</string>
         </property>
+        <property name="renderHints">
+         <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
+        </property>
        </widget>
       </item>
       <item>
