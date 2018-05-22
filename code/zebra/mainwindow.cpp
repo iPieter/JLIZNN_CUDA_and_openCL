@@ -33,6 +33,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->horizontalLayout_2->setStretch(0,4);
+    ui->horizontalLayout_2->setStretch(1,1);
+    ui->controls->setAlignment( Qt::AlignTop );
+
     //connect(ui->open, SIGNAL(QAction::toggled()), this, SLOT(MainWindow::on_open_triggered));
     //show openCL devices
     printDevices();
@@ -49,11 +53,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_pressed()
-{
-    //ui->setupUi(this);
-
-}
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
@@ -74,7 +73,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 }
 
-void MainWindow::on_pushButton_2_pressed()
+/*void MainWindow::on_pushButton_2_pressed()
 {
     QTextStream(stdout) << "kernel\n";
 
@@ -92,9 +91,9 @@ void MainWindow::on_pushButton_2_pressed()
     ui->mainImage->setScene(scene);
 
     scene->setSceneRect(image.rect());
-}
+}*/
 
-void MainWindow::on_pushButton_3_pressed()
+void MainWindow::on_apply_pressed()
 {
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*comp*sizeof(unsigned char) );
@@ -241,7 +240,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     kernel_size = value % 2 ? value : value + 1;
 }
 
-void MainWindow::on_pushButton_4_pressed()
+/*void MainWindow::on_pushButton_4_pressed()
 {
     QTextStream(stdout) << "colour grading\n";
 
@@ -259,7 +258,7 @@ void MainWindow::on_pushButton_4_pressed()
     ui->mainImage->setScene(scene);
 
     scene->setSceneRect(image.rect());
-}
+}*/
 
 void MainWindow::on_horizontalSlider_4_valueChanged(int value)
 {
@@ -396,9 +395,12 @@ void MainWindow::on_open_triggered()
 
     scene->setSceneRect(image.rect());
 
+    //ui->label_filename->setText(filename);
+
     QTimer::singleShot(200, this, SLOT(resize()));
 }
 
+/*
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
@@ -415,7 +417,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         return;
     if ((event->pos() - dragStartPosition).manhattanLength()< 10)
         return;
-*/
+
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
 
     if ( temp_file == NULL )
@@ -441,4 +443,25 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
         Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
     }
+}
+*/
+
+void MainWindow::on_enable_blackwhite_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked blackwhite" << value << " \n";
+    enabled_blackwhite = value == 2 ? true : false;
+}
+
+void MainWindow::on_enable_whitepoint_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked whitepoint " << value << " \n";
+    enabled_whitepoint = value == 2 ? true : false;
+
+}
+
+void MainWindow::on_enable_gaussian_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked gaussian " << value << " \n";
+    enabled_gaussian = value == 2 ? true : false;
+
 }
