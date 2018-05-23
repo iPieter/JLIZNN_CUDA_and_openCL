@@ -137,6 +137,12 @@ Het verschuiven van een witpunt van een afbeelding is een vorm van kleurencorrec
 \subsection{Qt}
 Qt is een \emph{cross-platform} raamwerk voor gebruikersinterfaces te ontwikkelen, waarbij de achterliggende code in C++ geschreven kan worden. Het raamwerk volgt een object-geörienteerde strategie, door iedere GUI-element te modelleren als een object (QWidget) met hiërarchische overerving voor verschillende types van elementen, zoals knoppen (QButton).
 
+\begin{figure*}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{screenshot.png}
+    \caption{Screenshot van de applicatie.}\label{fig:gui}
+\end{figure*}
+\newpage
 
 \section{Oplossing}
 
@@ -162,11 +168,27 @@ Aangezien dit systeem echter dient om beide te vergelijken, is er gekozen om all
 \subsection{GUI}
 De GUI is geschreven in Qt, waarbij gekozen wordt voor een venster met primaire focus op de geopende foto en de besturingselementen aan de rechterkant. Een schermafbeelding van de applicatie---die Zebra gedoopt is---is te zien in Figuur~\ref{fig:gui} 
 
-\begin{figure*}[htb]
+\begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{data/zebra.png}
-    \caption{Screenshot van de applicatie.}\label{fig:gui}
-\end{figure*}
+    \includegraphics[width=0.48\textwidth]{data/execution-time.png}
+    \caption{Invloed van \emph{work size} op uitvoertijd.}\label{fig:output-one}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{data/klein.png}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{data/normaal.png}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{data/groot.png}
+    \end{subfigure}
+    \caption{Grafische voorstelling van de data uit Tabel~\ref{table:measurements}.}\label{fig:images}
+\end{figure}
+
+\newpage
 
 \section{Evaluatie}
 
@@ -175,21 +197,24 @@ Zoals eerder vermeld, hebben verschillende devices een verschillende hardwarecon
 
 Voor een GPU (AMD Radeon Pro 555 Compute Engine) is een meting uitgevoerd over alle combinaties van 1x1 tot 128x128. Hiervoor is een afbeelding van 1024x1024 van een zebra gekozen, met vier kleurencomponenten (RGBA). Per dimensie zijn er 5 metingen uitgevoerd. Hier resultaat is grafisch te zien in Figuur~\ref{fig:output-all}. De data staat ook op Github. Een tweede meting is uitgevoerd voor een grotere \emph{work size}, maar volgens 1 dimensie. Het resultaat daarvan is te zien in Figuur~\ref{fig:output-one}.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.48\textwidth]{data/execution-time.png}
-    \caption{Invloed van \emph{work size} op uitvoertijd.}\label{fig:output-one}
-\end{figure}
 
-\begin{figure*}
-    \centering
-    \includegraphics[width=1.1\textwidth]{data/output_powers.pdf}
-    \caption{Invloed van \emph{work size} op uitvoertijd (in ns).}\label{fig:output-all}
-\end{figure*}
 
 Op basis van deze data zijn enkele observaties te maken. Zo is een kleine \emph{work size} zeer nadelig voor de uitvoeringssnelheid. Dit is in het bijzonder terug te zien voor een grootte van 1x1. Aangezien hierdoor maar 1 thread per \emph{work unit} gebruikt wordt, is het vanzelfsprekend dat dit een slechter resultaat oplevert.
 
-Een tweede observatie is dat de uitvoeringstijd boven $work size_x > 64$ terug wat toeneemt. Dit is vermoedelijk gedeeltelijk te wijten aan het feit dat de gebruikte afbeelding wordt opgedeeld in blokken, waardoor er een blok benodigd is dat niet volledig gevuld kon worden. Daarnaast is een compute unit van AMD ook 64 work units groot, wat verklaart waarom op veelvouden van 64 de beste performantie te zien is. Dit is duidelijk te zien in Figuur~\ref{fig:output-one}.
+Een tweede observatie is dat de uitvoeringstijd boven $work size_x > 64$ terug wat toeneemt. Dit is vermoedelijk gedeeltelijk te wijten aan het feit dat de gebruikte afbeelding wordt opgedeeld in blokken, waardoor er een blok benodigd is dat niet volledig gevuld kon worden. Daarnaast is een compute unit van AMD ook 64 work units groot, wat verklaart waarom op veelvouden van 64 de beste performantie te zien is. Dit is duidelijk te zien in Figuur~\ref{fig:output-one}
+
+\begin{table*}[]
+    \centering
+    \caption{Vergelijking tussen die OpenCL-devices op eenzelfde systeem, waarbij 5 keer een Gaussiaanse vervaging is toegepast.}\label{tab:mes}
+    \label{table:measurements}
+    \begin{tabular}{@{}llrrr@{}}
+        \toprule
+        Abeelding & Formaat (w, h, comp) & Intel i7-7700HQ CPU {(}ms{)} & Intel HD 630 {(}ms{)} & AMD Radeon Pro 555 {(}ms{)} \\ \midrule
+        bob.jpg   & 48 x 64 x 3              & 3.9157                       & 4.552                 & 2.2738                      \\
+        zebra.jpg & 2048 x 1365 x 3      & 2265.7                       & 4083.6                & 1954.3                      \\
+        paris.jpg & 11661 x 3581 x 4 & 42172 &Kernel beïndigt& 6257.6 \\ \bottomrule
+    \end{tabular}
+\end{table*}
 
 \subsection{Vergelijking tussen devices}
 Aangezien OpenCL voor meerdere \emph{devices} en types van apparaten werkt, is het gemakkelijk deze te vergelijken. Daarnaast ondersteunt de GUI deze selectie ook, waardoor meerdere ingebouwde devices eenvoudig te benchmarken zijn. In dit geval zijn drie foto's vijf keer vervaagd op de drie OpenCL-devices in een Macbook Pro 2018 15". Hier resultaat hiervan is weergeven in Tabel~\ref{tab:mes} en grafisch in Figuur~\ref{fig:images}.
@@ -202,35 +227,15 @@ Daarnaast valt er op te merken dat de prestaties van de dedicated GPU stukken be
 
 De kleine afbeelding wijkt echter af van dit patroon. Aangezien het een zéér kleine afbeelding betreft (750 bytes), kunnen andere factoren een rol spelen. Zo moet OpenCL ook voor op de CPU een proces met meerdere threads aanmaken, wat mogelijks nog kostelijker is dan dit op de GPU te doen. 
 
-\begin{table*}[]
-    \centering
-    \caption{Vergelijking tussen die OpenCL-devices op eenzelfde systeem, waarbij 5 keer een Gaussiaanse vervaging is toegepast.}\label{tab:mes}
-    \label{table:measurements}
-    \begin{tabular}{@{}llrrr@{}}
-        \toprule
-        Abeelding & Formaat (w, h, comp) & Intel i7-7700HQ CPU {(}ms{)} & Intel HD 630 {(}ms{)} & AMD Radeon Pro 555 {(}ms{)} \\ \midrule
-        bob.jpg   & 48 x 64 x 3              & 3.9157                       & 4.552                 & 2.2738                      \\
-        zebra.jpg & 2048 x 1365 x 3      & 2265.7                       & 4083.6                & 1954.3                      \\
-        paris.jpg & 11661 x 3581 x 4 & 42172 &Kernel incorrect beïndigd& 6257.6 \\ \bottomrule
-    \end{tabular}
-\end{table*}
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{data/klein.png}
-    \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{data/normaal.png}
-    \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{data/groot.png}
-    \end{subfigure}
-    \caption{Grafische voorstelling van de data uit Tabel~\ref{table:measurements}.}\label{fig:images}
-\end{figure}
 
 \section{Besluit}
 Dit verslag werd geschreven als een extra opdracht voor het labo `Geavanceerde computerarchitectuur'. Een pipeline om afbeeldingen te bewerken met behulp van \textit{masks} werd opgezet en ge\"evalueerd.
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=1.1\textwidth]{data/output_powers.pdf}
+    \caption{Invloed van \emph{work size} op uitvoertijd (in ns).}\label{fig:output-all}
+\end{figure*}
 
 \onecolumn
 
