@@ -1,8 +1,18 @@
-__kernel void gray( global const unsigned char *img_original, global unsigned char *img )
+__kernel void gray( global const unsigned char *img_original, global unsigned char *img, int width, int comp )
 {
-    img[ get_global_id(0) * 3 + 0 ] = img_original[ get_global_id(0) * 3 + 0 ];
-    img[ get_global_id(0) * 3 + 1 ] = img_original[ get_global_id(0) * 3 + 0 ];
-    img[ get_global_id(0) * 3 + 2 ] = img_original[ get_global_id(0) * 3 + 0 ];
+    const int2 pos = {get_global_id(0), get_global_id(1)};
+
+    img[ comp * (pos.x * width + pos.y) + 0 ] = img[ comp * (pos.x * width + pos.y) + 0 ];
+    img[ comp * (pos.x * width + pos.y) + 1 ] = img[ comp * (pos.x * width + pos.y) + 0 ];
+    img[ comp * (pos.x * width + pos.y) + 2 ] = img[ comp * (pos.x * width + pos.y) + 0 ];
+}
+
+__kernel void sync_images( global unsigned char *img_original, global unsigned char *img, int width, int comp )
+{
+    const int2 pos = {get_global_id(0), get_global_id(1)};
+
+    for (int i = 0; i < comp; i++) 
+        img_original[ comp * (pos.x * width + pos.y) + i ] = 0;
 }
 
 __kernel void red( global const unsigned char *img_original, global unsigned char *img )

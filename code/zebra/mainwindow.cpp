@@ -115,6 +115,9 @@ void MainWindow::on_apply_pressed()
         if (enabled_gaussian)
             pipeline->add_gaussian( w, h, comp, device[0], device[1], kernel_size );
 
+        if (enabled_blackwhite)
+            pipeline->add_blackwhite( w, h, comp, device[0], device[1] );
+
         pipeline->run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
 
         delete pipeline;

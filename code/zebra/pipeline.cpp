@@ -160,6 +160,24 @@ double Pipeline::createFilter(double *gKernel, int size)
    return sum;
 }
 
+int Pipeline::add_blackwhite( int w, int h, int comp, int platform, int device )
+{
+    int err = 0;
+    cl_kernel gray_kernel = clCreateKernel( program, "gray", &err );
+    kernels.push_back( gray_kernel );
+
+    if( err != CL_SUCCESS )
+    {
+        std::cout << "Couldn't create gray kernel" << err << std::endl;
+    }
+
+    err |= clSetKernelArg( gray_kernel, 0, sizeof(cl_mem), &gray_cl );
+    err |= clSetKernelArg( gray_kernel, 1, sizeof(cl_mem), &img_cl );
+    err |= clSetKernelArg( gray_kernel, 2, sizeof(int), (const void *)&w );
+    err |= clSetKernelArg( gray_kernel, 3, sizeof(double), (const void *)&comp );
+    return err;
+}
+
 int Pipeline::add_gaussian( int w, int h, int comp, int platform, int device, int kernel_size )
 {
     int err  = 0;
@@ -196,7 +214,7 @@ int Pipeline::set_image( unsigned char* img_original, unsigned char* result, int
 {
     int err = 0;
     gray_cl = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, img_original, NULL );
-    img_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, result, NULL );
+    img_cl = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, result, NULL );
     
     std::cout << "Setting buffer args" << std::endl;
 
@@ -231,14 +249,8 @@ int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int
     }
 
     int err = 0;
-    cl_kernel gray_kernel = clCreateKernel( program, "gray", &err );
 
-    if( err != CL_SUCCESS )
-    {
-        std::cout << "Couldn't create gray kernel" << err << std::endl;
-    }
-
-    cl_kernel red_kernel = clCreateKernel( program, "red", &err );
+    cl_kernel sync_images = clCreateKernel( program, "sync_images", &err );
 
     if( err != CL_SUCCESS )
     {
@@ -255,11 +267,8 @@ int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int
 
     std::cout << "Setting buffer args" << std::endl;
 
-    err |= clSetKernelArg( gray_kernel, 0, sizeof(cl_mem), &gray_cl );
-    err |= clSetKernelArg( gray_kernel, 1, sizeof(cl_mem), &img_cl );
-
-    err |= clSetKernelArg( red_kernel, 0, sizeof(cl_mem), &gray_cl );
-    err |= clSetKernelArg( red_kernel, 1, sizeof(cl_mem), &img_cl );
+    err |= clSetKernelArg( sync_images, 0, sizeof(cl_mem), &gray_cl );
+    err |= clSetKernelArg( sync_images, 1, sizeof(cl_mem), &img_cl );
 
 
     if( err != CL_SUCCESS )
@@ -274,13 +283,15 @@ int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int
     //size_t localWorkSize[] = {8, 8};
 
     //timing
-    cl_event event;
 
     //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     for ( auto kernel : kernels )
-        err = clEnqueueNDRangeKernel( command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
-   
+    {
+        //err = clEnqueueNDRangeKernel( command_queue, sync_images, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL );
+        //err = clFinish( command_queue );
+        err = clEnqueueNDRangeKernel( command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL );
+    }
     if( err != CL_SUCCESS )
     {
         std::cout << "Couldn't enqueue buffer:" << err << std::endl;
@@ -288,7 +299,6 @@ int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int
 
     std::cout << "Waiting for queue to finish" << std::endl;
 
-    clWaitForEvents(1, &event);
 
     err = clFinish( command_queue );
 
@@ -313,22 +323,11 @@ int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int
     clReleaseContext( context );
     clReleaseCommandQueue( command_queue );
     clReleaseMemObject( gray_cl );
-    clReleaseKernel( gray_kernel );
+    for ( auto kernel : kernels )
+        clReleaseKernel( kernel );
     clReleaseProgram( program );
 
     //free( img );
-    cl_ulong time_submit;
-    cl_ulong time_start;
-    cl_ulong time_end;
-
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(time_submit), &time_submit, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
-
-    double ns = time_end-time_start;
-    double overhead = time_start-time_submit;
-    printf("OpenCl Execution time is: %0.6f milliseconds, width %0.6f overhead \n",ns / 1000000.0, overhead / 1000000.0);
-
 
     return 0;
 }
