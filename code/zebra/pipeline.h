@@ -13,7 +13,7 @@ class Pipeline
     public:
     void initialise( int platform, int device );
     int add_blackwhite( int w, int h, int comp, int platform, int device );
-    int add_whitepoint();
+    int add_whitepoint( int w, int h, int comp, int platform, int device, int r, int g, int b );
     int add_gaussian( int w, int h, int comp, int platform, int device, int kernel_size );
     int set_image( unsigned char* img_original, unsigned char* result, int w, int h, int comp );
     int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device, int kernel_size);

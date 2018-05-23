@@ -178,6 +178,28 @@ int Pipeline::add_blackwhite( int w, int h, int comp, int platform, int device )
     return err;
 }
 
+int Pipeline::add_whitepoint( int w, int h, int comp, int platform, int device, int r, int g, int b )
+{
+    int err = 0;
+    cl_kernel gray_kernel = clCreateKernel( program, "image_grading", &err );
+    kernels.push_back( gray_kernel );
+
+    if( err != CL_SUCCESS )
+    {
+        std::cout << "Couldn't create gray kernel" << err << std::endl;
+    }
+
+    err |= clSetKernelArg( gray_kernel, 0, sizeof(cl_mem), &gray_cl );
+    err |= clSetKernelArg( gray_kernel, 1, sizeof(cl_mem), &img_cl );
+    err |= clSetKernelArg( gray_kernel, 2, sizeof(int), (const void *)&w );
+    err |= clSetKernelArg( gray_kernel, 3, sizeof(double), (const void *)&comp );
+    err |= clSetKernelArg( gray_kernel, 4, sizeof(int), (const void *)&r );
+    err |= clSetKernelArg( gray_kernel, 5, sizeof(int), (const void *)&g );
+    err |= clSetKernelArg( gray_kernel, 6, sizeof(int), (const void *)&b );
+
+    return err;
+}
+
 int Pipeline::add_gaussian( int w, int h, int comp, int platform, int device, int kernel_size )
 {
     int err  = 0;

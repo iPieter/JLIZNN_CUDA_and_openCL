@@ -39,7 +39,9 @@ private:
     unsigned char *img = NULL;
     int w, h, comp;
 
-    int r,g,b;
+    int r = 255;
+    int g = 255;
+    int b = 255;
 
     int kernel_size = 5;
 

@@ -15,11 +15,14 @@ __kernel void sync_images( global unsigned char *img_original, global unsigned c
         img_original[ comp * (pos.x * width + pos.y) + i ] = 0;
 }
 
-__kernel void red( global const unsigned char *img_original, global unsigned char *img )
+__kernel void image_grading( global const unsigned char *img_original, global unsigned char *img, int width, int comp, int r, int g, int b)
 {
-    img[ get_global_id(0) * 3 + 0 ] = 0.6 * img[ get_global_id(0) * 3 + 0 ];
-    img[ get_global_id(0) * 3 + 1 ] = 0.5 * img[ get_global_id(0) * 3 + 1 ];
-    img[ get_global_id(0) * 3 + 2 ] = 0.4 * img[ get_global_id(0) * 3 + 2 ];
+    const int2 pos = {get_global_id(0), get_global_id(1)};
+
+    img[ comp * (pos.x * width + pos.y) + 0 ] = clamp( (int) 255.0 * img[ comp * (pos.x * width + pos.y) + 0 ] / r, 0, 255 );
+    img[ comp * (pos.x * width + pos.y) + 1 ] = clamp( (int) 255.0 * img[ comp * (pos.x * width + pos.y) + 1 ] / g, 0, 255 );
+    img[ comp * (pos.x * width + pos.y) + 2 ] = clamp( (int) 255.0 * img[ comp * (pos.x * width + pos.y) + 2 ] / b, 0, 255 );
+
 }
 
 #define TEST_INDEX(i,size) ((i >= 0 && i < size) ? true : false)

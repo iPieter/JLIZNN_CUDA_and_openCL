@@ -115,6 +115,9 @@ void MainWindow::on_apply_pressed()
         if (enabled_gaussian)
             pipeline->add_gaussian( w, h, comp, device[0], device[1], kernel_size );
 
+        if (enabled_whitepoint)
+            pipeline->add_whitepoint( w, h, comp, device[0], device[1], r, g, b );
+
         if (enabled_blackwhite)
             pipeline->add_blackwhite( w, h, comp, device[0], device[1] );
 
