@@ -231,10 +231,14 @@ De kleine afbeelding wijkt echter af van dit patroon. Aangezien het een zéér k
 \section{Besluit}
 Dit verslag werd geschreven als een extra opdracht voor het labo `Geavanceerde computerarchitectuur'. Een pipeline om afbeeldingen te bewerken met behulp van \textit{masks} werd opgezet en ge\"evalueerd.
 
+Op basis van een van de geïmplementeerde operaties zijn twee aspecten van OpenCL geanalyseerd. Ten eerste is de invloed van de \emph{work size} voor een kernel bekeken, mocht deze op een GPU (in dit geval van AMD) draaien. Hieruit is geconcludeerd dat 64 of een veeldvoud hiervan voor GPU's van AMD de beste optie was. OpenCL biedt ook de mogelijkheid om dit automatisch in te stellen, wat dan ook gedaan is voor de tweede evaluatie.
+
+Als tweede aspect zijn verschillende devices met elkaar vergeleken voor het beoogde doel: foto's ontwikkelen. 
+
 \begin{figure*}
     \centering
     \includegraphics[width=1.1\textwidth]{data/output_powers.pdf}
-    \caption{Invloed van \emph{work size} op uitvoertijd (in ns).}\label{fig:output-all}
+    \caption{Invloed van een tweedimensionale \emph{work size} op uitvoertijd (in ns).}\label{fig:output-all}
 \end{figure*}
 
 \onecolumn
