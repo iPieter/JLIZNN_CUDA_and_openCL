@@ -40,7 +40,8 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         std_image.h \
-        std_image_write.h
+        std_image_write.h \
+    pipeline.h
 
 FORMS += \
     mainwindow.ui

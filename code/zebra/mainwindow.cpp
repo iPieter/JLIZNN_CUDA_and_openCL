@@ -9,7 +9,6 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QTemporaryFile>
-#include <QGraphicsPixmapItem>
 
 #include <algorithm>    // std::max
 
@@ -26,7 +25,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "pipeline.cpp"
+#include "pipeline.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -97,14 +96,29 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::on_apply_pressed()
 {
+    if (enabled_gaussian || enabled_blackwhite || enabled_whitepoint )
+    {
     //create copy
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*comp*sizeof(unsigned char) );
 
 
+
     //duplicate events for each device
     for ( auto device : enabled_devices )
-        run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
+    {
+        Pipeline* pipeline = new Pipeline();
+
+        pipeline->initialise( device[0], device[1] );
+        pipeline->set_image( img_original, img, w, h, comp );
+        
+        if (enabled_gaussian)
+            pipeline->add_gaussian( w, h, comp, device[0], device[1], kernel_size );
+
+        pipeline->run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
+
+        delete pipeline;
+    }
 
     //fixed a memory lead #proud
     delete scene;
@@ -117,6 +131,7 @@ void MainWindow::on_apply_pressed()
 
     scene->setSceneRect(image.rect());
 
+
     delete [ ] img_original;
     img_original = NULL;
 
@@ -124,6 +139,7 @@ void MainWindow::on_apply_pressed()
         //delete [ ] gKernel[i];
     //delete [ ] gKernel;
     //gKernel = NULL;
+    }
 }
 
 

@@ -11,8 +11,11 @@
 #include <string.h>
 #include <Qfile>
 #include <QLatin1Literal>
+#include <QTextStream>
 
-cl_program load_program( QString file_name, cl_context context, cl_device_id device )
+#include "pipeline.h"
+
+cl_program Pipeline::load_program( QString file_name, cl_context context, cl_device_id device )
 {
     cl_int err;
 
@@ -70,7 +73,7 @@ cl_program load_program( QString file_name, cl_context context, cl_device_id dev
     return program;
 }
 
-cl_command_queue create_command_queue( cl_context context, cl_device_id device )
+cl_command_queue  Pipeline::create_command_queue( cl_context context, cl_device_id device )
 {
     char* value;
     size_t valueSize;
@@ -93,7 +96,7 @@ cl_command_queue create_command_queue( cl_context context, cl_device_id device )
     return result;
 }
 
-cl_context CreateContext()
+cl_context Pipeline::createContext()
 {
     cl_int errNum = 0;
     cl_uint numPlatforms = 0;
@@ -126,7 +129,7 @@ cl_context CreateContext()
     return context;
 }
 
-double createFilter(double *gKernel, int size)
+double Pipeline::createFilter(double *gKernel, int size)
 {
    //generate pascals triangle
    double *row = new double[size];
@@ -157,9 +160,51 @@ double createFilter(double *gKernel, int size)
    return sum;
 }
 
-int run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device, int kernel_size)
+int Pipeline::add_gaussian( int w, int h, int comp, int platform, int device, int kernel_size )
 {
-   
+    int err  = 0;
+    cl_kernel blur_kernel = clCreateKernel( program, "kernel_test", &err );
+    kernels.push_back( blur_kernel );
+
+    if( err != CL_SUCCESS )
+    {
+        std::cout << "Couldn't create blur kernel" << err << std::endl;
+    }
+
+    const int size = w*h;
+
+    double *mask = new double[kernel_size * kernel_size];
+    double sf = createFilter( mask, kernel_size );
+    sf *= sf;
+
+    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * kernel_size * kernel_size, (void *)mask, NULL );
+
+    err |= clSetKernelArg( blur_kernel, 0, sizeof(cl_mem), &gray_cl );
+    err |= clSetKernelArg( blur_kernel, 1, sizeof(cl_mem), &img_cl );
+    err |= clSetKernelArg( blur_kernel, 2, sizeof(int), (const void *)&size );
+    err |= clSetKernelArg( blur_kernel, 3, sizeof(int), (const void *)&w );
+    err |= clSetKernelArg( blur_kernel, 4, sizeof(cl_mem), &mask_cl );
+    err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&kernel_size );
+    err |= clSetKernelArg( blur_kernel, 6, sizeof(double), (const void *)&sf );
+    err |= clSetKernelArg( blur_kernel, 7, sizeof(double), (const void *)&comp );
+
+    return err;
+}
+
+
+int Pipeline::set_image( unsigned char* img_original, unsigned char* result, int w, int h, int comp )
+{
+    int err = 0;
+    gray_cl = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, img_original, NULL );
+    img_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, result, NULL );
+    
+    std::cout << "Setting buffer args" << std::endl;
+
+    return err;
+}
+
+void Pipeline::initialise( int platform, int device )
+{
     cl_uint platform_id_count = 0;
     clGetPlatformIDs( 0, nullptr, &platform_id_count );
     std::vector<cl_platform_id> platform_ids(platform_id_count);
@@ -171,11 +216,15 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
     clGetDeviceIDs( platform_ids [0], CL_DEVICE_TYPE_ALL, device_id_count, device_ids.data (), nullptr );
 
 
-    cl_context context = CreateContext();
+    context = createContext();
 
-    cl_program program = load_program(":/test.cl", context, device_ids[platform] );
-    cl_command_queue command_queue = create_command_queue( context, device_ids[device] );
+    program = load_program(":/test.cl", context, device_ids[platform] );
+    command_queue = create_command_queue( context, device_ids[device] );
+}
 
+int Pipeline::run(unsigned char* img_original, unsigned char* result, int w, int h, int comp, int platform, int device, int kernel_size)
+{
+   
     if( !img_original )
     {
         return -1;
@@ -196,12 +245,6 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
         std::cout << "Couldn't create red kernel" << err << std::endl;
     }
 
-    cl_kernel blur_kernel = clCreateKernel( program, "kernel_test", &err );
-
-    if( err != CL_SUCCESS )
-    {
-        std::cout << "Couldn't create blur kernel" << err << std::endl;
-    }
 
     //float *img = (float *)malloc( w * h * comp * sizeof(unsigned char));
     //memcpy( img, img_original, w * h * comp );
@@ -210,10 +253,6 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     std::cout<< "Size: " << w * h * comp << std::endl;
 
-    err = 0;
-    cl_mem gray_cl = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, img_original, NULL );
-    cl_mem img_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * w * h * comp, result, NULL );
-    
     std::cout << "Setting buffer args" << std::endl;
 
     err |= clSetKernelArg( gray_kernel, 0, sizeof(cl_mem), &gray_cl );
@@ -221,23 +260,6 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     err |= clSetKernelArg( red_kernel, 0, sizeof(cl_mem), &gray_cl );
     err |= clSetKernelArg( red_kernel, 1, sizeof(cl_mem), &img_cl );
-
-    const int size = w*h;
-
-    double *mask = new double[kernel_size * kernel_size];
-    double sf = createFilter( mask, kernel_size );
-    sf *= sf;
-
-    cl_mem mask_cl = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(double) * kernel_size * kernel_size, (void *)mask, NULL );
-
-    err |= clSetKernelArg( blur_kernel, 0, sizeof(cl_mem), &gray_cl );
-    err |= clSetKernelArg( blur_kernel, 1, sizeof(cl_mem), &img_cl );
-    err |= clSetKernelArg( blur_kernel, 2, sizeof(int), (const void *)&size );
-    err |= clSetKernelArg( blur_kernel, 3, sizeof(int), (const void *)&w );
-    err |= clSetKernelArg( blur_kernel, 4, sizeof(cl_mem), &mask_cl );
-    err |= clSetKernelArg( blur_kernel, 5, sizeof(int), (const void *)&kernel_size );
-    err |= clSetKernelArg( blur_kernel, 6, sizeof(double), (const void *)&sf );
-    err |= clSetKernelArg( blur_kernel, 7, sizeof(double), (const void *)&comp );
 
 
     if( err != CL_SUCCESS )
@@ -256,7 +278,8 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     //err = clEnqueueNDRangeKernel( command_queue, gray_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
     //err = clEnqueueNDRangeKernel( command_queue, red_kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL );
-    err = clEnqueueNDRangeKernel( command_queue, blur_kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
+    for ( auto kernel : kernels )
+        err = clEnqueueNDRangeKernel( command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, &event );
    
     if( err != CL_SUCCESS )
     {
