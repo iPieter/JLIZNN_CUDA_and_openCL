@@ -251,10 +251,10 @@ int run(unsigned char* img_original, unsigned char* result, int w, int h, int co
 
     outfile.open("measurements.csv", std::ios_base::app);
     outfile << "platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5\n";
-    for (int work_size_x = 1; work_size_x < 128; work_size_x++)
+    for (int work_size_x = 1; work_size_x <= 1; work_size_x++)
     {
         std::cout << work_size_x << std::endl;
-        for (int work_size_y = 1; work_size_y < 128; work_size_y++)
+        for (int work_size_y = 1; work_size_y < 512; work_size_y++)
         {
             outfile << platform << ';' << device << ';' << work_size_x << ';' << work_size_y;
 
