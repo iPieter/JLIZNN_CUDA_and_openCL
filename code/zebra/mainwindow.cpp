@@ -25,13 +25,18 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "pipeline.cpp"
+#include "pipeline.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->horizontalLayout_2->setStretch(0,4);
+    ui->horizontalLayout_2->setStretch(1,1);
+    ui->controls->setAlignment( Qt::AlignTop );
+    ui->mainImage->setRenderHints( QPainter::Antialiasing | QPainter::HighQualityAntialiasing );
 
     //connect(ui->open, SIGNAL(QAction::toggled()), this, SLOT(MainWindow::on_open_triggered));
     //show openCL devices
@@ -49,11 +54,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_pressed()
-{
-    //ui->setupUi(this);
-
-}
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
@@ -74,7 +74,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 }
 
-void MainWindow::on_pushButton_2_pressed()
+/*void MainWindow::on_pushButton_2_pressed()
 {
     QTextStream(stdout) << "kernel\n";
 
@@ -92,77 +92,51 @@ void MainWindow::on_pushButton_2_pressed()
     ui->mainImage->setScene(scene);
 
     scene->setSceneRect(image.rect());
-}
+}*/
 
-void MainWindow::on_pushButton_3_pressed()
+void MainWindow::on_apply_pressed()
 {
+    if (enabled_gaussian || enabled_blackwhite || enabled_whitepoint )
+    {
+    //create copy
     unsigned char* img_original( new unsigned char[ w * h * comp]);
     memcpy( img_original, img, w*h*comp*sizeof(unsigned char) );
 
-    /*
-    int **gKernel;
-    gKernel = new int *[kernel_size];
-    for(int i = 0; i <kernel_size; i++)
-        gKernel[i] = new int[kernel_size];
-    int sum = createFilter(gKernel, kernel_size);
-
-    for (int x = 0; x < kernel_size; ++x)
-    {
-        QTextStream(stdout) << "{";
-
-        for (int y = 0; y < kernel_size; ++y)
-        {
-            QTextStream(stdout) << gKernel[x][y] << ", ";
-        }
-        QTextStream(stdout) << "}\n";
-
-    }
-
-    QTextStream(stdout) << "sum" << sum << "\n";
 
 
-    for( int x = 0; x < w; x++ )
-    {
-        for( int y = 0; y < h; y++ )
-        {
-            if( x + y * w < w*h * 3 )
-            {
-                int sum_r_x = 0;
-                int sum_g_x = 0;
-                int sum_b_x = 0;
-
-                for( int i = 0; i < kernel_size; i++ )
-                {
-                    for( int j = 0; j < kernel_size; j++ )
-                    {
-                        int index = (x + i - kernel_size / 2 + (y + j - kernel_size /2) * w) * 3;
-                        if( TEST_INDEX(index, w*h * 3))
-                        {
-                            sum_r_x += gKernel[i][j] * img_original[index];
-                            sum_g_x += gKernel[i][j] * img_original[index + 1];
-                            sum_b_x += gKernel[i][j] * img_original[index + 2];
-                        }
-                    }
-                }
-
-                img[ (x + y * w) * 3 + 0 ] = (unsigned char)(sum_r_x / sum / sum );
-                img[ (x + y * w) * 3 + 1 ] = (unsigned char)(sum_g_x / sum / sum );
-                img[ (x + y * w) * 3 + 2 ] = (unsigned char)(sum_b_x / sum / sum );
-            }
-        }
-    }
-    */
+    //duplicate events for each device
     for ( auto device : enabled_devices )
-        run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
+    {
+        Pipeline* pipeline = new Pipeline();
 
+        pipeline->initialise( device[0], device[1] );
+        pipeline->set_image( img_original, img, w, h, comp );
+        
+        if (enabled_gaussian)
+            pipeline->add_gaussian( w, h, comp, device[0], device[1], kernel_size );
+
+        if (enabled_whitepoint)
+            pipeline->add_whitepoint( w, h, comp, device[0], device[1], r, g, b );
+
+        if (enabled_blackwhite)
+            pipeline->add_blackwhite( w, h, comp, device[0], device[1] );
+
+        pipeline->run( img_original, img, w, h, comp, device[0], device[1], kernel_size);
+
+        delete pipeline;
+    }
+
+    //fixed a memory lead #proud
     delete scene;
 
+    //set image to view
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
     scene = new QGraphicsScene(this);
     scene->addPixmap(QPixmap::fromImage(imageQ));
     ui->mainImage->setScene(scene);
 
     scene->setSceneRect(image.rect());
+
 
     delete [ ] img_original;
     img_original = NULL;
@@ -171,6 +145,7 @@ void MainWindow::on_pushButton_3_pressed()
         //delete [ ] gKernel[i];
     //delete [ ] gKernel;
     //gKernel = NULL;
+    }
 }
 
 
@@ -241,7 +216,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     kernel_size = value % 2 ? value : value + 1;
 }
 
-void MainWindow::on_pushButton_4_pressed()
+/*void MainWindow::on_pushButton_4_pressed()
 {
     QTextStream(stdout) << "colour grading\n";
 
@@ -259,7 +234,7 @@ void MainWindow::on_pushButton_4_pressed()
     ui->mainImage->setScene(scene);
 
     scene->setSceneRect(image.rect());
-}
+}*/
 
 void MainWindow::on_horizontalSlider_4_valueChanged(int value)
 {
@@ -396,9 +371,12 @@ void MainWindow::on_open_triggered()
 
     scene->setSceneRect(image.rect());
 
+    //ui->label_filename->setText(filename);
+
     QTimer::singleShot(200, this, SLOT(resize()));
 }
 
+/*
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
@@ -415,7 +393,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         return;
     if ((event->pos() - dragStartPosition).manhattanLength()< 10)
         return;
-*/
+
     QImage imageQ(img, w, h, comp == 3 ? QImage::Format_RGB888 : QImage::Format_RGBA8888);
 
     if ( temp_file == NULL )
@@ -441,4 +419,25 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
         Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
     }
+}
+*/
+
+void MainWindow::on_enable_blackwhite_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked blackwhite" << value << " \n";
+    enabled_blackwhite = value == 2 ? true : false;
+}
+
+void MainWindow::on_enable_whitepoint_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked whitepoint " << value << " \n";
+    enabled_whitepoint = value == 2 ? true : false;
+
+}
+
+void MainWindow::on_enable_gaussian_stateChanged(int value)
+{
+    QTextStream(stdout) <<"checked gaussian " << value << " \n";
+    enabled_gaussian = value == 2 ? true : false;
+
 }
