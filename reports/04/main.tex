@@ -92,7 +92,7 @@ Een tweede kwestie is in welke kleurruimte operaties uitgevoerd worden. Standaar
     \item \textbf{HSI}: Variant op HSL, maar met een intensiteit-parameter in plaats van de helderheid.  
     \item \textbf{CMYK}: additief kleurensysteem voor drukwerk, voor digitale verwerking biedt dit geen voordelen. 
     \item \textbf{CIE XYZ}: systeem gebaseerd op perceptie. Er is één helderheidscomponent (Y) en twee kleurencomponenten (X en Z). Dit systeem is zeer bruikbaar voor het mixen van kleuren.
-    \item \textbf{CIElab}: Een tweede systeem met twee kleurencomponenten en een helderheidscomponent. Hier worden kleuren geëncodeerd als \emph{Luminance} en een combinatie van rood-groen en blauw-geel. Het is minder bruikbaar voor kleurtransformaties, maar is uniform (in tegenstelling to gequantiseerde modellen zoals RGB).
+    \item \textbf{CIElab}: Een tweede systeem met twee kleurencomponenten en een helderheidscomponent. Hier worden kleuren geëncodeerd als \emph{Luminance} en een combinatie van rood-groen en blauw-geel. Het is minder bruikbaar voor kleurtransformaties, maar is uniform (in tegenstelling to gequantiseerde modellen zoals RGB). Dit systeem wordt in Photoshop gebruikt als intermediaire representatie bij het converteren tussen kleurensystemen.
 \end{itemize}
 
 Voor de meeste operaties is een RBG-ruimte dus prima te doen, waarbij eventueel kan overgeschakeld worden naar CIE XYZ als intermediaire voorstelling mocht het mixen van kleuren gewenst zijn. 
