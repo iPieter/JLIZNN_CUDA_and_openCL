@@ -52,7 +52,7 @@
 \maketitle
 
 \section{Inleiding}
-
+Dit verslag is geschreven als extra opdracht voor het labo geavanceerde computerarchitectuur. Het OpenCL framework wordt toegelicht en getest op dezelfde scenario's als bij het labo over CUDA. Daarnaast is er een \emph{pipeline} opgezet om afbeeldingen te bewerken en meerdere filters toe te passen in één operatie. Dit is dan als \emph{cross platform} applicatie gebundeld. 
 
 \section{Analyse}
 
@@ -192,8 +192,15 @@ Op basis van deze data zijn enkele observaties te maken. Zo is een kleine \emph{
 Een tweede observatie is dat de uitvoeringstijd boven $work size_x > 64$ terug wat toeneemt. Dit is vermoedelijk gedeeltelijk te wijten aan het feit dat de gebruikte afbeelding wordt opgedeeld in blokken, waardoor er een blok benodigd is dat niet volledig gevuld kon worden. Daarnaast is een compute unit van AMD ook 64 work units groot, wat verklaart waarom op veelvouden van 64 de beste performantie te zien is. Dit is duidelijk te zien in Figuur~\ref{fig:output-one}.
 
 \subsection{Vergelijking tussen devices}
-Aangezien OpenCL voor meerdere \emph{devices} en types van apparaten werkt, is het gemakkelijk deze te vergelijken. Daarnaast ondersteunt de GUI deze selectie ook, waardoor meerdere ingebouwde devices gemakkelijk te benchmarken zijn. In dit geval zijn drie foto's vijf keer vervaagd op de drie OpenCL-devices in een Macbook Pro 2018 15". Hier resultaat hiervan is weergeven in Tabel~\ref{tab:mes} en grafisch in Figuur~\ref{fig:images}.
+Aangezien OpenCL voor meerdere \emph{devices} en types van apparaten werkt, is het gemakkelijk deze te vergelijken. Daarnaast ondersteunt de GUI deze selectie ook, waardoor meerdere ingebouwde devices eenvoudig te benchmarken zijn. In dit geval zijn drie foto's vijf keer vervaagd op de drie OpenCL-devices in een Macbook Pro 2018 15". Hier resultaat hiervan is weergeven in Tabel~\ref{tab:mes} en grafisch in Figuur~\ref{fig:images}.
 
+Hierbij valt op te merken dat het initialiseren van een kernel niet in de metingen ingenomen zit, aangezien deze kernels persistent kunnen blijven op het apparaat. Een van de voordelen is tenslotte dat er een pipeline gemaakt kan worden, die op \emph{streaming data} inwerkt. 
+
+Op basis van de metingen vallen er een aantal observaties te maken. Ten eerste presteert de ingebouwde GPU van Intel ondermaats en weigert deze zelfs de grootste afbeelding te verwerken. Dit is vermoedelijk te wijten aan de opbouw van de pipeline, waardoor deze lang in één kernel kan blijven zitten. Dit blijkt geen probleem te zijn voor de andere twee apparaten, maar voor de Intel GPU wel. Ook zijn sommige afbeeldingen hierdoor niet volledig correct verwerkt. Aangezien de kernel correct functioneert op twee andere apparaten, is hier niet verder op ingegaan.
+
+Daarnaast valt er op te merken dat de prestaties van de dedicated GPU stukken beter zijn voor het zeer kleine bestand én het zeer grote bestand. Maar niet voor een bestand van 2048 x 1365 pixels. Voor het grote bestand is een snelheidswinst te verwachten, en bij kleinere bestanden is het dan ook weer logisch dat de snelheidswinst minder wordt door de kost van het initialiseren ten opzichte van de CPU. Dit verwachtingspatroon is ook terug te zien in de normale en grote afbeeldingen. 
+
+De kleine afbeelding wijkt echter af van dit patroon. Aangezien het een zéér kleine afbeelding betreft (750 bytes), kunnen andere factoren een rol spelen. Zo moet OpenCL ook voor op de CPU een proces met meerdere threads aanmaken, wat mogelijks nog kostelijker is dan dit op de GPU te doen. 
 
 \begin{table*}[]
     \centering
