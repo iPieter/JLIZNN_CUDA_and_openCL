@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="test.cl">test.cl</file>
+        <file>no-file.png</file>
     </qresource>
 </RCC>

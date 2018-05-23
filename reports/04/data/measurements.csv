@@ -1,0 +1,3 @@
+platform;device;work_size_x;work_size_y;ms_exec1;ms_overhead1;ms_exec2;ms_overhead2;ms_exec3;ms_overhead3;ms_exec4;ms_overhead4;ms_exec5;ms_overhead5
+0;0;auto;auto;4.20862e+10;35523;4.29207e+10;21025;4.1793e+10;33612;4.14534e+10;21234;4.26073e+10;26180
+0;2;auto;auto;6.23678e+09;1000;6.24079e+09;1000;6.23459e+09;1000;6.27111e+09;1000;6.30443e+09;1000
