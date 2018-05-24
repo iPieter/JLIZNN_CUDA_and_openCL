@@ -8,6 +8,7 @@
 \usepackage{subcaption}
 \usepackage[width=.8\textwidth]{caption}
 \usepackage{float}
+\usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{booktabs}
 \usepackage{multicol}
@@ -46,7 +47,8 @@
 \begin{document}
 
 \title{Geavanceerde computerarchitectuur: Labo 02' \\ 
-\large{Uitbreiding: OpenCL}}
+\large{Uitbreiding: OpenCL} \\
+\small{\url{https://github.com/iPieter/JLIZNN_CUDA_and_openCL}}}
 \author{\textsc{Anton Danneels en Pieter Delobelle}}
 \date{}
 \maketitle
@@ -227,13 +229,33 @@ Daarnaast valt er op te merken dat de prestaties van de dedicated GPU stukken be
 
 De kleine afbeelding wijkt echter af van dit patroon. Aangezien het een zéér kleine afbeelding betreft (750 bytes), kunnen andere factoren een rol spelen. Zo moet OpenCL ook voor op de CPU een proces met meerdere threads aanmaken, wat mogelijks nog kostelijker is dan dit op de GPU te doen. 
 
+\subsection{Vergelijking met CUDA}
+Figuur~\ref{fig:vs} geeft de \emph{speedup factor} weer van beide systemen ten opzichte van een \emph{single-theaded} equivalente operatie op de CPU. Hiervoor is de code van een eerder labo gebruikt, wat op een systeem met een GeForce GT 750M uitgevoerd is. 
+
+Daarnaast is in Figuur~\ref{fig:vs-overhead} ook de overhead weergegeven voor een afbeelding. Hierbij is voor OpenCL de setup (kernel initialiseren, command queue opzetten) apart gemeten, aangezien dit een eenmalige operatie is. 
+
+Uit deze metingen valt een enigszins onverwachte conclusie te trekken: OpenCL is ongeveer 20x langzamer is over alle metingen. Mogelijks is dit te wijten aan het feit dat (oudere) NVIDEA GPU's slechtere ondersteuning hebben voor OpenCL.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{data/opencl-vs-cuda.png}
+    \caption{Speedup van Gaussiaans vervagen \\in OpenCL en CUDA t.o.v. de CPU.}\label{fig:vs}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{data/opencl-vs-cuda-overhead.png}
+    \caption{Overhead van Gaussiaans vervagen \\in OpenCL, CUDA en op de CPU.}\label{fig:vs-overhead}
+\end{figure}
 
 \section{Besluit}
 Dit verslag werd geschreven als een extra opdracht voor het labo `Geavanceerde computerarchitectuur'. Een pipeline om afbeeldingen te bewerken met behulp van \textit{masks} werd opgezet en ge\"evalueerd.
 
-Op basis van een van de geïmplementeerde operaties zijn twee aspecten van OpenCL geanalyseerd. Ten eerste is de invloed van de \emph{work size} voor een kernel bekeken, mocht deze op een GPU (in dit geval van AMD) draaien. Hieruit is geconcludeerd dat 64 of een veeldvoud hiervan voor GPU's van AMD de beste optie was. OpenCL biedt ook de mogelijkheid om dit automatisch in te stellen, wat dan ook gedaan is voor de tweede evaluatie.
+Op basis van een van de geïmplementeerde operaties zijn drie aspecten van OpenCL geanalyseerd. Ten eerste is de invloed van de \emph{work size} voor een kernel bekeken, mocht deze op een GPU (in dit geval van AMD) draaien. Hieruit is geconcludeerd dat 64 of een veelvoud hiervan voor GPU's van AMD de beste optie was. OpenCL biedt ook de mogelijkheid om dit automatisch in te stellen, wat dan ook gedaan is voor de tweede evaluatie.
 
-Als tweede aspect zijn verschillende devices met elkaar vergeleken voor het beoogde doel: foto's ontwikkelen. 
+Als tweede aspect zijn verschillende devices met elkaar vergeleken voor het beoogde doel: foto's ontwikkelen. Hiervoor heeft een GPU duidelijk een snelheidsvoordeel ten opzichte van de CPU. Maar ook voor een CPU biedt OpenCL een voordeel, aangezien alle beschikbare cores ook gebruikt kunnen worden met dezelfde kernel. Niet alle apparaten werken echter even vlot, zo beïndigt de interne GPU van Intel regelmatig de OpenCL-kernels. 
+
+Als derde aspect is OpenCL vergeleken met CUDA. Hierbij bleek CUDA ongeveer 20x sneller te zijn voor alle metingen. Aangezien dit op dezelfde GPU is uitgevoerd, zou dit significant verschil te wijten kunnen zijn aan beperkte ondersteuning voor OpenCL van NVIDEA. OpenCL is tenslotte op veel vlakken een concurrerend systeem, met een open karakter. 
 
 \begin{figure*}
     \centering
@@ -244,9 +266,8 @@ Als tweede aspect zijn verschillende devices met elkaar vergeleken voor het beoo
 \onecolumn
 
 \appendix
-
-
-\include{data}
+\section{kernel.cl}
+\inputminted[tabsize = 4, obeytabs, breaklines]{c}{../../code/zebra/test.cl}
 
 \newpage
 

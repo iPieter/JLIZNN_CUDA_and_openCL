@@ -208,7 +208,7 @@ De generatie van willekeurige nummers genereert zowel nummers die snel gefactori
 
 \newpage
 
-\section{Besluit}
+\section {Besluit}
 In de voorgaande secties zijn \emph{message brokers}, stream-verwerking en Docker Swarm geïntroduceerd. Op basis van deze technieken is een \emph{distributed stream processing system} geïmplementeerd voor een Raspberry Pi-cluster. 
 
 Om de performantie en schaalbaarheid te evalueren, is gekozen om getallen te factoriseren, waarbij dit de bottleneck vormt. Hiermee zijn dan metingen gedaan voor een variabel aantal operatoren. 
@@ -266,7 +266,14 @@ pi@raspberrypi:~/Documents $
 Omwille van een verschillende implementatie van node.js voor ARM of i86, moet er een speciale versie van de Docker container voor node gekozen worden. 
 \inputminted[breaklines=true]{docker}{code/Dockerfile}
 
+\section{Flowcharts}
+De volgende flowcharts zijn van de source, operator en sink respectievelijk.
+\includepdf[scale=0.7]{spout.pdf}
+\includepdf[scale=0.5]{operator.pdf}
+\includepdf[scale=0.5]{sink.pdf}
+
 \section{Metingen}
+Zie volgende pagina
 \begin{figure*}[htb]
     \centering
     \begin{subfigure}{0.88\textwidth}
